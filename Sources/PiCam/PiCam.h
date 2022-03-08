@@ -9,6 +9,8 @@
  * 
  */
 
+/** Doxygen compliant formatting for comments */
+
 /*===========================[  Compile Flags  ]==========================================*/
 
 #ifndef PICAM_H
@@ -32,39 +34,61 @@
 
 /** Enumeration fot I/O method configuration */
 typedef enum {
+    /** Use read() call for buffers  */
     IO_METHOD_READ,
+    /** Use memory mapped buffers  */
     IO_METHOD_MMAP,
+    /** Use application allocated buffers */
     IO_METHOD_USERPTR,
 } io_method;
 
 struct buffer {
+    /** Pointer to starting pixel position */
     unsigned char *  start;
+    /** Pixel buffer length */
     size_t  length;
+    /** Timestamp of captured image buffer */
     struct timeval timestamp;
 };
 
-static io_method        io              = IO_METHOD_MMAP;
+/** I/O method to use for the library */
+static io_method io = IO_METHOD_MMAP;
+
+/** */
 static int              fd              = -1;
-struct buffer *         buffers         = NULL;
-static unsigned int     n_buffers       = 0;
+
+/** Variable to store the captured buffer */
+struct buffer * buffers = NULL;
+
+/** Number of buffers */
+static unsigned int n_buffers = 0;
 
 /** Global camera settings */
-/** Camera setting for image width  */
+/** Default camera setting for image width  */
 static unsigned int width = 640;
 
-/** Camera setting for image height  */
+/** Default camera setting for image height  */
 static unsigned int height = 480;
 
-/** Camera setting for frames per seconds */
+/** Default camera setting for frames per seconds */
 static unsigned int fps = 30;
 
-/** Global camera settings */
+/** Flag to store information whether ti capture continuous frame or not */
 static int continuous = 0;
-static int canny = 0;
-static int sobel = 0;
-static int guassianblur = 0;
+
+/** Variable to store lower limit for Canny edge detection. Default is set to 75 */
+static int lim_canny_lower = 75;
+
+/** Variable to store upper limit for Canny edge detection. Default is set to 150 */
+static int lim_canny_upper = 150;
+
+/** Variable to store limit for Sobel edge detection. Default is set to 100 */
+static int lim_sobel = 100;
+
+/** Default camera name in linux */
 static char* deviceName = "/dev/video0";
 
+/** Filename to save images incase of continuous capture  */
 static const char* const continuousFilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpg";
 
 /*===========================[  Function declarations  ]===================================*/
@@ -80,7 +104,7 @@ void StopContCapture(int sig_id);
  * @brief SIGINT interput handler
  * 
  */
-void InstallSIGINTHandler(); 
+void InstallSIGINTHandler(void); 
 
 /**
  * @brief Implementation of wrapper around v4l2_ioctl.
@@ -117,7 +141,7 @@ static void Saveas_Jpeg(const void* p, struct timeval tstp);
 static int read_buffer(void);
 
 /**
- * @brief Main loop to read and process frames
+ * @brief Function to read and process frames
  * 
  */
 static void CaptureFrame(void);
@@ -135,7 +159,7 @@ static void StopCapture(void);
 static void StartCapture(void);
 
 /**
- * @brief Deinitialization of device 
+ * @brief De-initialization of device 
  * 
  */
 static void DeInitCamera(void);
@@ -147,7 +171,7 @@ static void DeInitCamera(void);
 static void InitMMAP(void);
 
 /**
- * @brief Initialization for v4l2 buffer from camera device 
+ * @brief Initialization for v4l2 buffer for camera device 
  * 
  */
 static void InitCamera(void);

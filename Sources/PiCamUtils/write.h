@@ -9,6 +9,12 @@
  * 
  */
 
+/** Doxygen compliant formatting for comments */
+
+/*===========================[  Inclusions  ]=============================================*/
+
+
+
 typedef struct                       /**** BMP file header structure ****/
     {
     unsigned int   bfSize;           /* Size of file */
@@ -38,7 +44,7 @@ static char* filenamePart = NULL;
 
 
 /**
- * @brief Print error message and terminate programm with EXIT_FAILURE return code. 
+ * @brief Print error message and terminate program with EXIT_FAILURE return code. 
  * 
  * @param string_ptr    Error message to print
  *  
@@ -64,3 +70,4 @@ void writebitmapimage(int width, int height, unsigned char* src, char* filename)
  */
 void writejpegimage(int width, int height, unsigned char* img, char* filename);
 
+/*==============================[  End of File  ]======================================*/

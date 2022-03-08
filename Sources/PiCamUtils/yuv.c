@@ -9,6 +9,8 @@
  * 
  */
 
+/** Doxygen compliant formatting for comments */
+
 /*===========================[  Inclusions  ]=============================================*/
 
 #include <stdio.h>
@@ -52,6 +54,8 @@ void Convert_YUV420toYUV444(int width, int height, const unsigned char* src, uns
 }/* End of function YUV420toYUV444 */
 
 
+/** Converts YUV420 to RGB.  
+ */
 void Convert_YUV420toRGB(int width, int height, const unsigned char* src, unsigned char* dst) 
 {
     printf("Convert_YUV420toRGB should be executed only once \n");

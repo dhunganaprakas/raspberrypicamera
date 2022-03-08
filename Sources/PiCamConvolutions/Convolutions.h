@@ -9,6 +9,8 @@
  * 
  */
 
+/** Doxygen compliant formatting for comments */
+
 /*===========================[  Compile Flags  ]==========================================*/
 
 #ifndef CONVOLUTIONS_H

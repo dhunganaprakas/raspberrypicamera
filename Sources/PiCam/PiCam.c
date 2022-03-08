@@ -9,6 +9,8 @@
  * 
  */
 
+/** Doxygen compliant formatting for comments */
+
 /*===========================[  Inclusions  ]=============================================*/
 
 #include <assert.h>
@@ -28,17 +30,23 @@
 /** Define macro for clearing memory */
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 
+/*============================[  Global Variables  ]====================================*/
+
+/** Global buffer to store the image to implement desired algorithms and to save it */
 struct buffer Image_Buffer[] = {0};
 
-/*===========================[  Function definitions  ]===================================*/
+/*===========================[  Function definitions  ]=================================*/
 
+/** Stops continuous capture
+ */ 
 void StopContCapture(int sig_id) 
 {
 	printf("stoping continuous capture\n");
 	continuous = 0;
 }
 
-
+/** Assigns signal interrupt handler function pointer
+ */
 void InstallSIGINTHandler() 
 {
 	struct sigaction sa;
@@ -52,6 +60,8 @@ void InstallSIGINTHandler()
 	}
 }
 
+/** Input output control device driver
+ */ 
 static int xioctl(int fd, int req, void* argp)
 {
 	int r;
@@ -62,6 +72,8 @@ static int xioctl(int fd, int req, void* argp)
 	return r;
 }
 
+/** Updates the global buffer from captured buffer from v4l2 
+ */ 
 static void Update_LatestBuffer(const void* p, struct timeval timestamp)
 {
 	int image_size = width*height*3*sizeof(char);
@@ -71,8 +83,7 @@ static void Update_LatestBuffer(const void* p, struct timeval timestamp)
 	Convert_YUV420toYUV444(width, height, src, Image_Buffer->start);
 }
 
-/**
-	read single frame
+/**	Read single frame from v4l2 buffer
 */
 static int read_buffer(void)
 {
@@ -108,8 +119,7 @@ static int read_buffer(void)
 	return 1;
 }
 
-/**
-	CaptureFrame: read frames and process them
+/**	Captures image buffer and stores them in 
 */
 static void CaptureFrame(void)
 {	
@@ -161,8 +171,7 @@ static void CaptureFrame(void)
 	}
 }
 
-/**
-	stop capturing
+/**	Stop capturing v4l2 buffers
 */
 static void StopCapture(void)
 {
@@ -174,8 +183,7 @@ static void StopCapture(void)
     errno_exit("VIDIOC_STREAMOFF");
 }
 
-/**
-  start capturing
+/** Start capturing v4l2 buffers
 */
 static void StartCapture(void)
 {
@@ -202,6 +210,8 @@ static void StartCapture(void)
 
 }
 
+/** De-initializes camera using v4l2_munmap 
+*/
 static void DeInitCamera(void)
 {
 	unsigned int i;
@@ -213,6 +223,8 @@ static void DeInitCamera(void)
 	free(buffers);
 }
 
+/** Initializes MMAP to capture image buffers form v4l2 library
+ */ 
 static void InitMMAP(void)
 {
 	struct v4l2_requestbuffers req;
@@ -269,8 +281,7 @@ static void InitMMAP(void)
 }
 
 
-/**
-	initialize device
+/** Initializes camera and camera formats to capture v4l2 buffers 
 */
 static void InitCamera(void)
 {
@@ -388,8 +399,7 @@ static void InitCamera(void)
 
 }
 
-/**
-	close device
+/**	Closes camera
 */
 static void CloseCamera(void)
 {
@@ -399,8 +409,7 @@ static void CloseCamera(void)
 	fd = -1;
 }
 
-/**
-	open device
+/**	Open camera device
 */
 static void OpenCamera(void)
 {
@@ -428,8 +437,7 @@ static void OpenCamera(void)
 	}
 }
 
-/**
-	print usage information
+/**	Print usage information
 */
 static void usage(FILE* fp, int argc, char** argv)
 {
@@ -446,7 +454,7 @@ static void usage(FILE* fp, int argc, char** argv)
 		"-W | --width         Set image width\n"
 		"-H | --height        Set image height\n"
 		"-I | --interval      Set frame interval (fps) (-1 to skip)\n"
-		"-c | --continuous    Do continous capture, stop with SIGINT.\n"
+		"-c | --continuous    Do continuos capture, stop with SIGINT.\n"
 		"-v | --version       Print version\n"
 		"",
 		argv[0]);
@@ -454,6 +462,7 @@ static void usage(FILE* fp, int argc, char** argv)
 
 static const char short_options [] = "d:ho:q:mruW:H:I:vc";
 
+/** Parsing CLI user request for application */
 static const struct option
 long_options [] = {
 	{ "device",     required_argument,      NULL,           'd' },
@@ -471,6 +480,7 @@ long_options [] = {
 	{ 0, 0, 0, 0 }
 };
 
+/** Main app for execution */
 int main(int argc, char **argv)
 {
 	for (;;) {
@@ -535,12 +545,11 @@ int main(int argc, char **argv)
 				break;
 
 			case 'c':
-				// set flag for continuous capture, interuptible by sigint
+				// set flag for continuous capture, interruptable by sigint
 				continuous = 1;
 				InstallSIGINTHandler();
 				break;
 				
-
 			case 'v':
 				printf("Version \n");
 				exit(EXIT_SUCCESS);

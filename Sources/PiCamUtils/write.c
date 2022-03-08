@@ -9,6 +9,11 @@
  * 
  */
 
+/** Doxygen compliant formatting for comments */
+
+/*===========================[  Inclusions  ]=============================================*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,10 +21,9 @@
 #include <jpeglib.h>
 #include "write.h"
 
-/**
-	Print error message and terminate program with EXIT_FAILURE return code.
+/*===========================[  Function definitions  ]===================================*/
 
-	\param s error message to print
+/**	Print error message and terminate program with EXIT_FAILURE return code.
 */
 void errno_exit(const char* s)
 {
@@ -27,6 +31,8 @@ void errno_exit(const char* s)
 	exit(EXIT_FAILURE);
 }
 
+/** This function writes captured buffer as a bitmap format. 
+ */ 
 void writebitmapimage(int width, int height, unsigned char* src, char* filename)
 {
 	BITMAPFILEHEADER bfh;
@@ -82,6 +88,8 @@ void writebitmapimage(int width, int height, unsigned char* src, char* filename)
 	fclose(file);
 }
 
+/** This function writes captured buffer as JPEG format. 
+ */ 
 void writejpegimage(int width, int height, unsigned char* img, char* filename)
 {
 	struct jpeg_compress_struct cinfo;
@@ -129,3 +137,5 @@ void writejpegimage(int width, int height, unsigned char* img, char* filename)
 	// close output file
 	fclose(outfile);
 }
+
+/*==============================[  End of File  ]======================================*/

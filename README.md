@@ -27,46 +27,11 @@ The folder structure of this PiCam library is as follow.
 |:-------------:|:-------------------------:|
 |   yuv.h       |   Header for YUV conversions  |
 |   yuv.c       |   Source file for YUV color space formats conversion |
+|   write.h     |   Header for declarations of write functions.
+|   write.c     |   Source file for implementation of saving image as jpeg and bmp  |
 |   PiCam.h     |   Header for camera initialization, processing v4l2 buffers and de-initialization   |
 |   PiCam.c     |   Source file for implementation of APIs for initialization, processing v4l2 buffers and de-initialization |
-
-
-@startuml
-rectangle {
-    file yuv.c      #orange
-    file yuv.h      #yellow
-    file PiCam.c    #orange
-    file PiCam.h    #yellow
-
-    yuv.c --> yuv.h
-    yuv.c --> unistd.h
-    PiCam.h --> stdlib.h
-    PiCam.h --> string.h
-    PiCam.h --> jpeglib.h
-    PiCam.h --> libv4l2.h
-    PiCam.h --> signal.h
-    PiCam.h --> inttypes.h
-    PiCam.c --> yuv.h
-    PiCam.c --> PiCam.h
-    PiCam.c --> assert.h
-    PiCam.c --> getopt.h
-    PiCam.c --> fcntl.h
-    PiCam.c --> errno.h
-    PiCam.c --> stat.h
-    PiCam.c --> ioctl.h
-    PiCam.c --> videodev2.h
-    PiCam.c --> mman.h
-
-    skinparam legendbackgroundcolor #white
-    legend left
-    <back:orange>   </back> Source files for PiCam application 
-    <back:yellow>   </back> Header files for PiCam application
-    <back:lightgrey>   </back> External Header files
-    endlegend
-}
-@enduml
-
-
+|
 
 ## PiCam Library
 
@@ -76,7 +41,8 @@ rectangle {
 
 |   Abbreviations   |   Description     |
 |:-----------------:|:-----------------:|
-|   YUV  | Colorspace for Luminance(Y) and Chrominance(UV)  |
+|   YUV  | Color space for Luminance(Y) and Chrominance(UV)  |
+|   v4l  |  Video for Linux |
 
 
 
