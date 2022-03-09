@@ -41,8 +41,11 @@ The folder structure of this PiCam library is as follow.
 
 |   Abbreviations   |   Description     |
 |:-----------------:|:-----------------:|
-|   YUV  | Color space for Luminance(Y) and Chrominance(UV)  |
+|   YUV  |  Color space for Luminance(Y) and Chrominance(UV)  |
 |   v4l  |  Video for Linux |
+|   API  |  Application Programming Interface   |
+|   jpeg |  Joint Photographic Experts Group    |
+|   bmp  |  Bitmap  |
 
 
 
@@ -78,7 +81,7 @@ The folder structure of this PiCam library is as follow.
 
 ## Version History
 
-*[05 March 2022] Initial Template Created for capturing image from CLI and basic information regarding the PiCam functionalities.
++ [05 March 2022] Initial Template Created for capturing image from CLI and basic information regarding the PiCam functionalities.
 
 
 ## Copyright and License

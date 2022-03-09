@@ -97,6 +97,7 @@ static const char* const continuousFilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpg"
  * @brief Stop SIGINT interput handler
  * 
  * @param[in] sig_id Signal ID 
+ * 
  */
 void StopContCapture(int sig_id);
 
@@ -107,10 +108,9 @@ void StopContCapture(int sig_id);
 void InstallSIGINTHandler(void); 
 
 /**
- * @brief Implementation of wrapper around v4l2_ioctl.
- * Do ioctl and retry if error EINTR was returned. A signal
- * was caught during the ioctl() operation. Parameters are
- * the same as on ioctl.
+ * @brief Implementation of wrapper around v4l2_ioctl. Capture ioctl buffer 
+ * and retry if error EINTR was returned. A signal was caught during the 
+ * ioctl() operation. Parameters are the same as on ioctl.
  * 
  * @param[in] fd    File descriptor
  * @param[in] req   Request
@@ -169,6 +169,12 @@ static void DeInitCamera(void);
  * 
  */
 static void InitMMAP(void);
+
+/**
+ * @brief Initialize v4l2 formats and checks if the camera settings are supported
+ * 
+ */
+void InitializeCameraFormats(struct v4l2_format format);
 
 /**
  * @brief Initialization for v4l2 buffer for camera device 

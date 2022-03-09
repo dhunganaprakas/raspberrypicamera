@@ -41,7 +41,7 @@ struct buffer Image_Buffer[] = {0};
  */ 
 void StopContCapture(int sig_id) 
 {
-	printf("stoping continuous capture\n");
+	printf("Stoping continuous capture\n");
 	continuous = 0;
 }
 
@@ -55,7 +55,7 @@ void InstallSIGINTHandler()
 	sa.sa_handler = StopContCapture;
 	if(sigaction(SIGINT, &sa, 0) != 0)
 	{
-		fprintf(stderr,"could not install SIGINT handler, continuous capture disabled");
+		fprintf(stderr,"Could not install SIGINT handler, continuous capture disabled \n");
 		continuous = 0;
 	}
 }
@@ -280,6 +280,62 @@ static void InitMMAP(void)
 	}
 }
 
+/** Initialize v4l2 formats and check if the camera device supports the 
+ * provided settings.
+*/
+void InitializeCameraFormats(struct v4l2_format format)
+{
+	struct v4l2_streamparm frameint;
+	unsigned int min;
+
+		// v4l2_format
+	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	format.fmt.pix.width = width;
+	format.fmt.pix.height = height;
+	format.fmt.pix.field = V4L2_FIELD_INTERLACED;
+	format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
+
+	if (-1 == xioctl(fd, VIDIOC_S_FMT, &format))
+		errno_exit("VIDIOC_S_FMT");
+
+	if (format.fmt.pix.pixelformat != V4L2_PIX_FMT_YUV420) {
+		fprintf(stderr,"Libv4l didn't accept YUV420 format. Can't proceed.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	/* Note VIDIOC_S_FMT may change width and height. */
+	if (width != format.fmt.pix.width) {
+		width = format.fmt.pix.width;
+		fprintf(stderr,"Image width set to %i by device %s.\n", width, deviceName);
+	}
+
+	if (height != format.fmt.pix.height) {
+		height = format.fmt.pix.height;
+		fprintf(stderr,"Image height set to %i by device %s.\n", height, deviceName);
+	}
+	
+  /* If the user has set the fps to -1, don't try to set the frame interval */
+  if (fps != -1)
+  {
+    CLEAR(frameint);
+    
+    /* Attempt to set the frame interval. */
+    frameint.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    frameint.parm.capture.timeperframe.numerator = 1;
+    frameint.parm.capture.timeperframe.denominator = fps;
+    if (-1 == xioctl(fd, VIDIOC_S_PARM, &frameint))
+      fprintf(stderr,"Unable to set frame interval.\n");
+  }
+
+	/* Buggy driver paranoia. */
+	min = format.fmt.pix.width * 2;
+	if (format.fmt.pix.bytesperline < min)
+		format.fmt.pix.bytesperline = min;
+	min = format.fmt.pix.bytesperline * format.fmt.pix.height;
+	if (format.fmt.pix.sizeimage < min)
+		format.fmt.pix.sizeimage = min;
+
+}
 
 /** Initializes camera and camera formats to capture v4l2 buffers 
 */
@@ -289,8 +345,6 @@ static void InitCamera(void)
 	struct v4l2_cropcap cropcap;
 	struct v4l2_crop crop;
 	struct v4l2_format fmt;
-	struct v4l2_streamparm frameint;
-	unsigned int min;
 
 	if (-1 == xioctl(fd, VIDIOC_QUERYCAP, &cap)) 
     {
@@ -348,53 +402,7 @@ static void InitCamera(void)
 
 	CLEAR(fmt);
 
-	// v4l2_format
-	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	fmt.fmt.pix.width = width;
-	fmt.fmt.pix.height = height;
-	fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
-	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
-
-	if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
-		errno_exit("VIDIOC_S_FMT");
-
-	if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_YUV420) {
-		fprintf(stderr,"Libv4l didn't accept YUV420 format. Can't proceed.\n");
-		exit(EXIT_FAILURE);
-	}
-
-	/* Note VIDIOC_S_FMT may change width and height. */
-	if (width != fmt.fmt.pix.width) {
-		width = fmt.fmt.pix.width;
-		fprintf(stderr,"Image width set to %i by device %s.\n", width, deviceName);
-	}
-
-	if (height != fmt.fmt.pix.height) {
-		height = fmt.fmt.pix.height;
-		fprintf(stderr,"Image height set to %i by device %s.\n", height, deviceName);
-	}
-	
-  /* If the user has set the fps to -1, don't try to set the frame interval */
-  if (fps != -1)
-  {
-    CLEAR(frameint);
-    
-    /* Attempt to set the frame interval. */
-    frameint.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    frameint.parm.capture.timeperframe.numerator = 1;
-    frameint.parm.capture.timeperframe.denominator = fps;
-    if (-1 == xioctl(fd, VIDIOC_S_PARM, &frameint))
-      fprintf(stderr,"Unable to set frame interval.\n");
-  }
-
-	/* Buggy driver paranoia. */
-	min = fmt.fmt.pix.width * 2;
-	if (fmt.fmt.pix.bytesperline < min)
-		fmt.fmt.pix.bytesperline = min;
-	min = fmt.fmt.pix.bytesperline * fmt.fmt.pix.height;
-	if (fmt.fmt.pix.sizeimage < min)
-		fmt.fmt.pix.sizeimage = min;
-
+	InitializeCameraFormats(fmt);
 	InitMMAP();
 
 }
@@ -460,7 +468,7 @@ static void usage(FILE* fp, int argc, char** argv)
 		argv[0]);
 	}
 
-static const char short_options [] = "d:ho:q:mruW:H:I:vc";
+static const char short_options [] = "d:ho:q:W:H:I:vc";
 
 /** Parsing CLI user request for application */
 static const struct option
@@ -469,9 +477,6 @@ long_options [] = {
 	{ "help",       no_argument,            NULL,           'h' },
 	{ "output",     required_argument,      NULL,           'o' },
 	{ "quality",    required_argument,      NULL,           'q' },
-	{ "mmap",       no_argument,            NULL,           'm' },
-	{ "read",       no_argument,            NULL,           'r' },
-	{ "userptr",    no_argument,            NULL,           'u' },
 	{ "width",      required_argument,      NULL,           'W' },
 	{ "height",     required_argument,      NULL,           'H' },
 	{ "interval",   required_argument,      NULL,           'I' },
@@ -512,21 +517,6 @@ int main(int argc, char **argv)
 			case 'q':
 				// set jpeg quality
 				jpegQuality = atoi(optarg);
-				break;
-
-			case 'm':
-				fprintf(stderr, "You didn't compile for mmap support.\n");
-				exit(EXIT_FAILURE);
-				break;
-
-			case 'r':
-				fprintf(stderr, "You didn't compile for read support.\n");
-				exit(EXIT_FAILURE);
-				break;
-
-			case 'u':
-				fprintf(stderr, "You didn't compile for userptr support.\n");
-				exit(EXIT_FAILURE);
 				break;
 
 			case 'W':
