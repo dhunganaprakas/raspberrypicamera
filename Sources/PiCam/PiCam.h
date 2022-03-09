@@ -117,8 +117,8 @@ void InstallSIGINTHandler(void);
  * @param[in] argp  Argument 
  * 
  * @return int 
- * @retval
- * @retval
+ * @retval  0   Returned successfully
+ * @retval  -1  Returned with error
  * 
  */
 static int xioctl(int fd, int req, void* argp);
@@ -126,8 +126,8 @@ static int xioctl(int fd, int req, void* argp);
 /**
  * @brief Process v4l2 buffer  
  * 
- * @param p     Buffer to receive v4l2 buffer      
- * @param tstp  Timestamp of received buffer
+ * @param[in] p     Buffer to receive v4l2 buffer      
+ * @param[in] tstp  Timestamp of received buffer
  * 
  */
 static void Saveas_Jpeg(const void* p, struct timeval tstp);
@@ -135,7 +135,8 @@ static void Saveas_Jpeg(const void* p, struct timeval tstp);
 /**
  * @brief Read single frame from buffer
  * 
- * @return int 
+ * @return int
+ * @retval 0    Operation successful 
  * 
  */
 static int read_buffer(void);
@@ -173,6 +174,7 @@ static void InitMMAP(void);
 /**
  * @brief Initialize v4l2 formats and checks if the camera settings are supported
  * 
+ * @param[in] format    Camera format to initialize
  */
 void InitializeCameraFormats(struct v4l2_format format);
 
@@ -182,6 +184,14 @@ void InitializeCameraFormats(struct v4l2_format format);
  */
 static void InitCamera(void);
 
+/**
+ * @brief Helper function to parse and assign parameters from CLI
+ * 
+ * @param[inout] argc   Input argument count
+ * @param[inout] argv   Input argument vector
+ * 
+ */
+void parseArguments(int argc, char **argv);
 
 
 #endif /** PICAM_H **/

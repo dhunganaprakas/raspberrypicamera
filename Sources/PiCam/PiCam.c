@@ -116,7 +116,7 @@ static int read_buffer(void)
     if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
         errno_exit("VIDIOC_QBUF");
 
-	return 1;
+	return 0;
 }
 
 /**	Captures image buffer and stores them in 
@@ -163,7 +163,7 @@ static void CaptureFrame(void)
 				count = 3;
 			}
 
-			if (read_buffer())
+			if (0 == read_buffer())
 				break;
 
 			/* EAGAIN - continue select loop. */
@@ -456,9 +456,6 @@ static void usage(FILE* fp, int argc, char** argv)
 		"-h | --help          Print this message\n"
 		"-o | --output        Set JPEG output filename\n"
 		"-q | --quality       Set JPEG quality (0-100)\n"
-		"-m | --mmap          Use memory mapped buffers\n"
-		"-r | --read          Use read() calls\n"
-		"-u | --userptr       Use application allocated buffers\n"
 		"-W | --width         Set image width\n"
 		"-H | --height        Set image height\n"
 		"-I | --interval      Set frame interval (fps) (-1 to skip)\n"
@@ -470,9 +467,9 @@ static void usage(FILE* fp, int argc, char** argv)
 
 static const char short_options [] = "d:ho:q:W:H:I:vc";
 
-/** Parsing CLI user request for application */
-static const struct option
-long_options [] = {
+/** Usage of arguments passed to application */
+static const struct option long_options [] = 
+{
 	{ "device",     required_argument,      NULL,           'd' },
 	{ "help",       no_argument,            NULL,           'h' },
 	{ "output",     required_argument,      NULL,           'o' },
@@ -480,23 +477,23 @@ long_options [] = {
 	{ "width",      required_argument,      NULL,           'W' },
 	{ "height",     required_argument,      NULL,           'H' },
 	{ "interval",   required_argument,      NULL,           'I' },
-	{ "version",	no_argument,		NULL,		'v' },
-	{ "continuous",	no_argument,		NULL,		'c' },
+	{ "version",	no_argument,			NULL,			'v' },
+	{ "continuous",	no_argument,			NULL,			'c' },
 	{ 0, 0, 0, 0 }
 };
 
-/** Main app for execution */
-int main(int argc, char **argv)
+/** Parsing arguments from CLI */
+void parseArguments(int argc, char **argv)
 {
-	for (;;) {
+	for (;;) 
+	{
 		int index, c = 0;
-
 		c = getopt_long(argc, argv, short_options, long_options, &index);
-
 		if (-1 == c)
 			break;
 
-		switch (c) {
+		switch (c) 
+		{
 			case 0: /* getopt_long() flag */
 				break;
 
@@ -548,8 +545,24 @@ int main(int argc, char **argv)
 			default:
 				usage(stderr, argc, argv);
 				exit(EXIT_FAILURE);
-		}
+		}			
 	}
+}
+
+/**
+ * @brief Main app for PiCam library
+ * 
+ * @param argc	Input argument count
+ * @param argv 	Input argument vector
+ * @return int 
+ * @retval 0	Returned successfully
+ * @retval -1	Error encountered
+ *  
+ */
+   
+int main(int argc, char **argv)
+{
+	parseArguments(argc, argv);
 
 	/** Checks for required parameters and prints if not in order */
 	if (!filename) {
