@@ -1,7 +1,7 @@
 /**
  * @file write.h
- * @author your name (you@domain.com)
- * @brief 
+ * @author Prakash Dhungana (dhunganaprakas@gmail.com)
+ * @brief   <b> Implementation for writing image </b>
  * @version 0.1
  * @date 2022-03-06
  * 
@@ -9,37 +9,59 @@
  * 
  */
 
-/** Doxygen compliant formatting for comments */
+/** Doxygen compliant formatting for documentation */
 
 /*===========================[  Inclusions  ]=============================================*/
 
 
+/** BMP file header structure */
+typedef struct                       
+{
+    /** Size of file */
+    unsigned int   bfSize;  
+    /** Reserved - BMP standard */         
+    unsigned short bfReserved1;
+    /** Reserved - BMP standard */      
+    unsigned short bfReserved2;
+    /** Offset to bitmap pixel data */      
+    unsigned int   bfOffBits;        
+} BITMAPFILEHEADER;
 
-typedef struct                       /**** BMP file header structure ****/
-    {
-    unsigned int   bfSize;           /* Size of file */
-    unsigned short bfReserved1;      /* Reserved */
-    unsigned short bfReserved2;      /* ... */
-    unsigned int   bfOffBits;        /* Offset to bitmap data */
-    } BITMAPFILEHEADER;
 
-typedef struct                       /**** BMP file info structure ****/
-    {
-    unsigned int   biSize;           /* Size of info header */
-    int            biWidth;          /* Width of image */
-    int            biHeight;         /* Height of image */
-    unsigned short biPlanes;         /* Number of color planes */
-    unsigned short biBitCount;       /* Number of bits per pixel */
-    unsigned int   biCompression;    /* Type of compression to use */
-    unsigned int   biSizeImage;      /* Size of image data */
-    int            biXPelsPerMeter;  /* X pixels per meter */
-    int            biYPelsPerMeter;  /* Y pixels per meter */
-    unsigned int   biClrUsed;        /* Number of colors used */
-    unsigned int   biClrImportant;   /* Number of important colors */
-    } BITMAPINFOHEADER;
+/** BMP file info structure */
+typedef struct                       
+{
+    /** Image size of file info header */
+    unsigned int   biSize;           
+    /** Width of image */
+    int            biWidth;          
+    /** Height of image */
+    int            biHeight;         
+    /** Number of color planes */
+    unsigned short biPlanes;         
+    /** Number of bits per pixel */
+    unsigned short biBitCount;       
+    /** Number of bits per pixel */
+    unsigned int   biCompression;    
+    /** Size of image data */
+    unsigned int   biSizeImage;      
+    /** X pixels per meter */
+    int            biXPelsPerMeter;  
+    /** Y pixels per meter */
+    int            biYPelsPerMeter;  
+    /** Number of colors used */
+    unsigned int   biClrUsed;        
+    /** Number of important colors */
+    unsigned int   biClrImportant;   
+} BITMAPINFOHEADER;
 
+/** Image quality for JPEG compression */
 static unsigned char jpegQuality = 70;
+
+/** Pointer to store image filename */
 static char* filename = NULL;
+
+/** Filename extension */
 static char* filenamePart = NULL;
 
 

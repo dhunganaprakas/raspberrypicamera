@@ -9,7 +9,7 @@
  * 
  */
 
-/** Doxygen compliant formatting for comments */
+/** Doxygen compliant formatting for documentation */
 
 
 /*===========================[  Compile Flags  ]==========================================*/
@@ -29,13 +29,13 @@
 #define LIMITPIXEL(x) ((x>255)?255:((x<0)?0:x))
 
 /** Return red pixel value from YUV */
-#define GETREDPIXEL_FROM_YUV(y,v)       (LIMITPIXEL( (int)(y + ((337*v) >> 8) - 179)))
+#define GETREDPIXEL_FROM_YUV(y,v)       (LIMITPIXEL( (int)(1.164*(y-16) + 1.596*(v-128))))
 
 /** Return red pixel value from YUV */
-#define GETGREENPIXEL_FROM_YUV(y,u,v)   (LIMITPIXEL( (int)(y - (( 87*u) >> 8) - ((181*v) >> 8) + 135)))
+#define GETGREENPIXEL_FROM_YUV(y,u,v)   (LIMITPIXEL( (int)(1.164*(y-16) - 0.392*(u-128) -0.813*(v-128))))
 
 /** Return red pixel value from YUV */
-#define GETBLUEPIXEL_FROM_YUV(y, u)     (LIMITPIXEL( (int)(y + ((450*u) >> 8) - 226)))
+#define GETBLUEPIXEL_FROM_YUV(y, u)     (LIMITPIXEL( (int)(1.164*(y-16) + 2.017*(u-128))))
 
 /*===========================[  Function declarations  ]===================================*/
 
@@ -48,10 +48,10 @@
  * @param[inout] dst    Pointer of destination image to save the changed format
  * 
  */
-void Convert_YUV420toYUV444(int width, int height, const unsigned char* src, unsigned char* dst);
+void Convert_YUV420toYUV444(int width, int height, unsigned char* src, unsigned char* dst);
 
 /**
- * @brief Convert image colorspace format from YUV420 to YUV444.
+ * @brief Converts YUV420 pixels to bitmap formatting for RGB colorspace.
  * 
  * @param[in] width     Width of the image
  * @param[in] height    Height of the image
@@ -59,7 +59,17 @@ void Convert_YUV420toYUV444(int width, int height, const unsigned char* src, uns
  * @param[inout] dst    Pointer of destination image to save the changed format
  * 
  */
-void Convert_YUV420toRGB(int width, int height, const unsigned char* src, unsigned char* dst);
+void Convert_YUV420toBMPRGB(int width, int height, unsigned char* src, unsigned char* dst);
+
+/**
+ * @brief Convert image colorspace format from YUV420 to RGB444.
+ * 
+ * @param[in] width     Width of the image
+ * @param[in] height    Height of the image
+ * @param[in] src       Pointer of source image to change format 
+ * @param[inout] dst    Pointer of destination image to save the changed format
+ */
+void Convert_YUV420toRGB444(int width, int height, unsigned char* src, unsigned char* dst);
 
 #endif /** YUV_H **/
 

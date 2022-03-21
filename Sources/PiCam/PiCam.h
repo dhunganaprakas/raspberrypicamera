@@ -1,15 +1,15 @@
 /**
  * @file PiCam.h
- * @author Prakash Dhungana (dhunganaprakas)
+ * @author Prakash Dhungana (dhunganaprakas@gmail.com)
  * @brief Header for the main application
- * @version 0.0.1
- * @date 2022-03-03 Initial template
+ * @version 
+ * @date 2022-03-03    Initial template
  * 
  * @copyright Copyright (c) 2022
  * 
  */
 
-/** Doxygen compliant formatting for comments */
+/** Doxygen compliant formatting for documentation */
 
 /*===========================[  Compile Flags  ]==========================================*/
 
@@ -55,7 +55,7 @@ struct buffer {
 static io_method io = IO_METHOD_MMAP;
 
 /** */
-static int              fd              = -1;
+static int fd = -1;
 
 /** Variable to store the captured buffer */
 struct buffer * buffers = NULL;
@@ -88,13 +88,33 @@ static int lim_sobel = 100;
 /** Default camera name in linux */
 static char* deviceName = "/dev/video0";
 
+/** Default pixel format to capture */
+uint32_t pixel_format = V4L2_PIX_FMT_YUV420;
+
 /** Filename to save images incase of continuous capture  */
 static const char* const continuousFilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpg";
+
+static const char short_options [] = "d:ho:q:W:H:I:vc";
+
+/** Usage of arguments passed to application */
+static const struct option long_options [] = 
+{
+	{ "device",     required_argument,      NULL,           'd' },
+	{ "help",       no_argument,            NULL,           'h' },
+	{ "output",     required_argument,      NULL,           'o' },
+	{ "quality",    required_argument,      NULL,           'q' },
+	{ "width",      required_argument,      NULL,           'W' },
+	{ "height",     required_argument,      NULL,           'H' },
+	{ "interval",   required_argument,      NULL,           'I' },
+	{ "version",	no_argument,			NULL,			'v' },
+	{ "continuous",	no_argument,			NULL,			'c' },
+	{ 0, 0, 0, 0 }
+};
 
 /*===========================[  Function declarations  ]===================================*/
 
 /**
- * @brief Stop SIGINT interput handler
+ * @brief Stop SIGINT interput handler.
  * 
  * @param[in] sig_id Signal ID 
  * 
@@ -102,7 +122,7 @@ static const char* const continuousFilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpg"
 void StopContCapture(int sig_id);
 
 /**
- * @brief SIGINT interput handler
+ * @brief SIGINT interput handler.
  * 
  */
 void InstallSIGINTHandler(void); 
@@ -117,81 +137,97 @@ void InstallSIGINTHandler(void);
  * @param[in] argp  Argument 
  * 
  * @return int 
- * @retval  0   Returned successfully
- * @retval  -1  Returned with error
+ * @retval  EXIT_SUCCESS  Returned successfully.
+ * @retval  EXIT_FAILURE  Returned with error.
  * 
  */
 static int xioctl(int fd, int req, void* argp);
 
 /**
- * @brief Process v4l2 buffer  
- * 
- * @param[in] p     Buffer to receive v4l2 buffer      
- * @param[in] tstp  Timestamp of received buffer
- * 
- */
-static void Saveas_Jpeg(const void* p, struct timeval tstp);
-
-/**
- * @brief Read single frame from buffer
+ * @brief Read single frame from buffer.
  * 
  * @return int
- * @retval 0    Operation successful 
+ * @retval EXIT_SUCCESS Operation successful
+ * @retval EXIT_FAILURE Operation unsuccessful 
  * 
  */
-static int read_buffer(void);
+static int ReadBuffer(void);
 
 /**
- * @brief Function to read and process frames
+ * @brief Function to read and process frames.
  * 
  */
 static void CaptureFrame(void);
 
 /**
- * @brief Stop capturing frames from buffer
+ * @brief Stop capturing frames from buffer.
  * 
  */
 static void StopCapture(void);
 
 /**
- * @brief Start capturing frames from buffer
+ * @brief Start capturing frames from buffer.
  * 
  */
 static void StartCapture(void);
 
 /**
- * @brief De-initialization of device 
+ * @brief De-initialization of device. 
  * 
  */
 static void DeInitCamera(void);
 
 /**
- * @brief Initialization of MMAP driver
+ * @brief Initialization of MMAP driver.
  * 
  */
 static void InitMMAP(void);
 
 /**
- * @brief Initialize v4l2 formats and checks if the camera settings are supported
+ * @brief Initialize v4l2 formats and checks if the camera settings are supported.
  * 
  * @param[in] format    Camera format to initialize
  */
 void InitializeCameraFormats(struct v4l2_format format);
 
 /**
- * @brief Initialization for v4l2 buffer for camera device 
+ * @brief Initialization for v4l2 buffer for camera device.
  * 
  */
 static void InitCamera(void);
 
 /**
- * @brief Helper function to parse and assign parameters from CLI
+ * @brief Helper function to parse and assign parameters from CLI.
  * 
  * @param[inout] argc   Input argument count
  * @param[inout] argv   Input argument vector
  * 
  */
-void parseArguments(int argc, char **argv);
+void ParseArguments(int argc, char **argv);
+
+/**
+ * @brief   Helper function to print usage information 
+ * 
+ * @param[in] fp    File pointer
+ * @param[in] argc  Input argument count
+ * @param[in] argv  Input argument vector
+ */
+static void usage(FILE* fp, int argc, char** argv);
+
+/**
+ * @brief Checks if the filename has been provided for the CLI when running the PiCam library.
+ * 
+ * @param[in] fname 
+ */
+static void CheckValidationFilename (char* fname, int argc, char** argv);
+
+/**
+ * @brief Checks if the continuous flag is set and updates the filename formatting 
+ * to save the captured image using timestamp.
+ * 
+ * @param[in] flag  Flag to set continuous capture
+ */
+static void CheckContinuousFlag( int flag);
 
 
 #endif /** PICAM_H **/

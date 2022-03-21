@@ -9,7 +9,7 @@
  * 
  */
 
-/** Doxygen compliant formatting for comments */
+/** Doxygen compliant formatting for documentation */
 
 /*===========================[  Inclusions  ]=============================================*/
 
@@ -38,13 +38,17 @@ void writebitmapimage(int width, int height, unsigned char* src, char* filename)
 	BITMAPFILEHEADER bfh;
 	BITMAPINFOHEADER bih;
 
-	/* Magic number for file. It does not fit in the header structure due to alignment requirements, so put it outside */
-	unsigned short bfType=0x4d42;           
+	/* Bitmap standard formatting rules. It does not fit in the header structure due 
+	to alignment requirements, so put it outside */
+	unsigned short bfType=0x4d42;     
+
+	/* File header informations */      
 	bfh.bfReserved1 = 0;
 	bfh.bfReserved2 = 0;
 	bfh.bfSize = 2+sizeof(BITMAPFILEHEADER)+sizeof(BITMAPINFOHEADER)+ height*width*3;
 	bfh.bfOffBits = 0x36;
 
+	/* BMP Image header informations */
 	bih.biSize = sizeof(BITMAPINFOHEADER);
 	bih.biWidth = width;
 	bih.biHeight = height;
@@ -64,31 +68,16 @@ void writebitmapimage(int width, int height, unsigned char* src, char* filename)
         return;
     }
 
-	/*Write headers*/
+	/*Write headers and pixel values */
 	fwrite(&bfType,1,sizeof(bfType),file);
 	fwrite(&bfh, 1, sizeof(bfh), file);
 	fwrite(&bih, 1, sizeof(bih), file);
+	fwrite(src, sizeof(unsigned char), width * height * 3, file);
 
-	unsigned char *pixel = src + 3*height*width;
-
-	/*Write bitmap*/
-	for (int x = bih.biHeight-1; x >=0; x--) /*Scanline loop backwards*/
-    {
-        for (int y = bih.biWidth -1; y >= 0; y--) /*Column loop forwards*/
-        {
-            /*compute some pixel values*/
-            unsigned char r = *(pixel--);
-            unsigned char g = *(pixel--);
-            unsigned char b = *(pixel--);
-            fwrite(&b, 1, 1, file);
-            fwrite(&g, 1, 1, file);
-            fwrite(&r, 1, 1, file);
-        }
-    }
 	fclose(file);
 }
 
-/** This function writes captured buffer as JPEG format. 
+/** This function writes captured image buffer as JPEG format. 
  */ 
 void writejpegimage(int width, int height, unsigned char* img, char* filename)
 {
@@ -97,44 +86,38 @@ void writejpegimage(int width, int height, unsigned char* img, char* filename)
 
 	JSAMPROW row_pointer[1];
 	FILE *outfile = fopen( filename, "wb" );
-
-	// try to open file for saving
 	if (!outfile) {
 		errno_exit("jpeg");
 	}
 
-	// create jpeg data
+	/* Create JPEG data */
 	cinfo.err = jpeg_std_error( &jerr );
 	jpeg_create_compress(&cinfo);
 	jpeg_stdio_dest(&cinfo, outfile);
 
-	// set image parameters
+	/* Set image parameters */
 	cinfo.image_width = width;
 	cinfo.image_height = height;
 	cinfo.input_components = 3;
 	cinfo.in_color_space = JCS_YCbCr;
 
-	// set jpeg compression parameters to default
+	/* Set JPEG compression parameters to default, adjust quality setting and start conpression */
 	jpeg_set_defaults(&cinfo);
-	// and then adjust quality setting
 	jpeg_set_quality(&cinfo, jpegQuality, TRUE);
-
-	// start compress
 	jpeg_start_compress(&cinfo, TRUE);
 
-	// feed data
-	while (cinfo.next_scanline < cinfo.image_height) {
+	/* Feed pixel data */
+	while (cinfo.next_scanline < cinfo.image_height) 
+	{
 		row_pointer[0] = &img[cinfo.next_scanline * cinfo.image_width *  cinfo.input_components];
 		jpeg_write_scanlines(&cinfo, row_pointer, 1);
 	}
 
-	// finish compression
+	/* Finish compression */
 	jpeg_finish_compress(&cinfo);
-
-	// destroy jpeg data
 	jpeg_destroy_compress(&cinfo);
 
-	// close output file
+	/* Close output image file */
 	fclose(outfile);
 }
 

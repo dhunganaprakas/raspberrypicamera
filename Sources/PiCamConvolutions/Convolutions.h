@@ -9,7 +9,7 @@
  * 
  */
 
-/** Doxygen compliant formatting for comments */
+/** Doxygen compliant formatting for documentation */
 
 /*===========================[  Compile Flags  ]==========================================*/
 
@@ -31,6 +31,28 @@
  * 
  */
 void GaussianFilter(int width, int height, const unsigned char* src, unsigned char* dst);
+
+/**
+ * @brief 
+ * 
+ * @param[in] width     Width of the image
+ * @param[in] height    Height of the image
+ * @param[in] src       Pointer of source image to apply Gaussian filter 
+ * @param[inout] dst    Pointer of destination image to save Gaussian image 
+ * 
+ */
+void MeanFilter(int width, int height, const unsigned char* src, unsigned char* dst);
+
+/**
+ * @brief 
+ * 
+ * @param[in] width     Width of the image
+ * @param[in] height    Height of the image
+ * @param[in] src       Pointer of source image to apply Gaussian filter 
+ * @param[inout] dst    Pointer of destination image to save Gaussian image 
+ * 
+ */
+void MedianFilter(int width, int height, const unsigned char* src, unsigned char* dst);
 
 /**
  * @brief 

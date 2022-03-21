@@ -9,7 +9,7 @@
  * 
  */
 
-/** Doxygen compliant formatting for comments */
+/** Doxygen compliant formatting for documentation */
 
 /*===========================[  Inclusions  ]=============================================*/
 
@@ -21,9 +21,11 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
+#include <stdlib.h>
 #include "PiCam.h"
 #include "yuv.h"
 #include "write.h"
+#include "PiCam_copy.h"
 
 /*============================[  Defines  ]=============================================*/
 
@@ -33,7 +35,11 @@
 /*============================[  Global Variables  ]====================================*/
 
 /** Global buffer to store the image to implement desired algorithms and to save it */
-struct buffer Image_Buffer[] = {0};
+struct buffer Image_Buffer;
+
+/** Global buffer to save image */
+struct buffer Image_Save;
+
 
 /*===========================[  Function definitions  ]=================================*/
 
@@ -76,16 +82,15 @@ static int xioctl(int fd, int req, void* argp)
  */ 
 static void Update_LatestBuffer(const void* p, struct timeval timestamp)
 {
-	int image_size = width*height*3*sizeof(char);
+	int image_size = width*height*3*sizeof(char)/2;
 	unsigned char* src = (unsigned char*)p;
-	unsigned char* dst = malloc(image_size);
-	Image_Buffer->start = dst;
-	Convert_YUV420toYUV444(width, height, src, Image_Buffer->start);
+	Image_Buffer.start = malloc(image_size);
+	memcpy(Image_Buffer.start, src, image_size);
 }
 
 /**	Read single frame from v4l2 buffer
 */
-static int read_buffer(void)
+static int ReadBuffer(void)
 {
 	struct v4l2_buffer buf;
     CLEAR(buf);
@@ -110,7 +115,6 @@ static int read_buffer(void)
     }
 
     assert(buf.index < n_buffers);
-
 	Update_LatestBuffer(buffers[buf.index].start,buf.timestamp);
 
     if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
@@ -127,8 +131,9 @@ static void CaptureFrame(void)
 	unsigned int numberOfTimeouts;
 
 	numberOfTimeouts = 0;
-	count = 1;
-
+	count = 3;
+	printf("Updating image buffer \nSMILE PLEASE \n\t(-_-)\n");
+	
 	while (count-- > 0) {
 		for (;;) {
 			fd_set fds;
@@ -163,7 +168,7 @@ static void CaptureFrame(void)
 				count = 3;
 			}
 
-			if (0 == read_buffer())
+			if (0 == ReadBuffer())
 				break;
 
 			/* EAGAIN - continue select loop. */
@@ -288,19 +293,23 @@ void InitializeCameraFormats(struct v4l2_format format)
 	struct v4l2_streamparm frameint;
 	unsigned int min;
 
-		// v4l2_format
+	// v4l2_format
 	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	format.fmt.pix.width = width;
 	format.fmt.pix.height = height;
 	format.fmt.pix.field = V4L2_FIELD_INTERLACED;
-	format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
+	format.fmt.pix.pixelformat = pixel_format;
 
 	if (-1 == xioctl(fd, VIDIOC_S_FMT, &format))
 		errno_exit("VIDIOC_S_FMT");
 
-	if (format.fmt.pix.pixelformat != V4L2_PIX_FMT_YUV420) {
-		fprintf(stderr,"Libv4l didn't accept YUV420 format. Can't proceed.\n");
+	if (format.fmt.pix.pixelformat != pixel_format) {
+		fprintf(stderr,"Libv4l didn't accept %d format. Can't proceed.\n",pixel_format);
 		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		fprintf(stdout,"Capture successful in %d format \n", pixel_format);
 	}
 
 	/* Note VIDIOC_S_FMT may change width and height. */
@@ -445,8 +454,29 @@ static void OpenCamera(void)
 	}
 }
 
-/**	Print usage information
-*/
+static void CheckValidationFilename (char* fname, int argc, char** argv)
+{
+	/** Checks for required parameters and prints help if not in order */
+	if (!fname) 
+	{
+		fprintf(stderr, "You have to specify JPEG output filename!\n\n");
+		usage(stdout, argc, argv);
+		exit(EXIT_FAILURE);
+	}
+}
+
+static void CheckContinuousFlag( int flag)
+{
+	/** Continuous capture flag set to TRUE */
+	if(continuous == 1) 
+	{
+		int max_name_len = snprintf(NULL,0,continuousFilenameFmt,filename,UINT32_MAX,INT64_MAX);
+		filenamePart = filename;
+		filename = calloc(max_name_len+1,sizeof(char));
+		strcpy(filename,filenamePart);
+	}
+}
+
 static void usage(FILE* fp, int argc, char** argv)
 {
 	fprintf(fp,
@@ -463,27 +493,9 @@ static void usage(FILE* fp, int argc, char** argv)
 		"-v | --version       Print version\n"
 		"",
 		argv[0]);
-	}
+}
 
-static const char short_options [] = "d:ho:q:W:H:I:vc";
-
-/** Usage of arguments passed to application */
-static const struct option long_options [] = 
-{
-	{ "device",     required_argument,      NULL,           'd' },
-	{ "help",       no_argument,            NULL,           'h' },
-	{ "output",     required_argument,      NULL,           'o' },
-	{ "quality",    required_argument,      NULL,           'q' },
-	{ "width",      required_argument,      NULL,           'W' },
-	{ "height",     required_argument,      NULL,           'H' },
-	{ "interval",   required_argument,      NULL,           'I' },
-	{ "version",	no_argument,			NULL,			'v' },
-	{ "continuous",	no_argument,			NULL,			'c' },
-	{ 0, 0, 0, 0 }
-};
-
-/** Parsing arguments from CLI */
-void parseArguments(int argc, char **argv)
+void ParseArguments(int argc, char **argv)
 {
 	for (;;) 
 	{
@@ -498,51 +510,54 @@ void parseArguments(int argc, char **argv)
 				break;
 
 			case 'd':
+				/* In case of multiple camera, sets capture device */
 				deviceName = optarg;
 				break;
 
 			case 'h':
-				// print help
+				/* Prints help on usage from CLI */
 				usage(stdout, argc, argv);
 				exit(EXIT_SUCCESS);
 
 			case 'o':
-				// set jpeg filename
+				/* Set saved image filename */
 				filename = optarg;
 				break;
 
 			case 'q':
-				// set jpeg quality
+				/* Sets saved image JPEG quality */
 				jpegQuality = atoi(optarg);
 				break;
 
 			case 'W':
-				// set width
+				/* Sets captured image width */
 				width = atoi(optarg);
 				break;
 
 			case 'H':
-				// set height
+				/* Sets captured image height */
 				height = atoi(optarg);
 				break;
 				
 			case 'I':
-				// set fps
+				/* Sets fps */
 				fps = atoi(optarg);
 				break;
 
 			case 'c':
-				// set flag for continuous capture, interruptable by sigint
+				/* Sets flag for continuous capture */
 				continuous = 1;
 				InstallSIGINTHandler();
 				break;
 				
 			case 'v':
+				/* Prints version information */
 				printf("Version \n");
 				exit(EXIT_SUCCESS);
 				break;
 
 			default:
+				/* Prints usage formats from CLI */
 				usage(stderr, argc, argv);
 				exit(EXIT_FAILURE);
 		}			
@@ -552,32 +567,20 @@ void parseArguments(int argc, char **argv)
 /**
  * @brief Main app for PiCam library
  * 
- * @param argc	Input argument count
- * @param argv 	Input argument vector
+ * @param[inout] argc	Input argument count
+ * @param[inout] argv 	Input argument vector
+ * 
  * @return int 
- * @retval 0	Returned successfully
- * @retval -1	Error encountered
+ * @retval EXIT_SUCCESS	Returned successfully
+ * @retval EXIT_FAILURE	Error encountered
  *  
  */
    
 int main(int argc, char **argv)
 {
-	parseArguments(argc, argv);
-
-	/** Checks for required parameters and prints if not in order */
-	if (!filename) {
-		fprintf(stderr, "You have to specify JPEG output filename!\n\n");
-		usage(stdout, argc, argv);
-		exit(EXIT_FAILURE);
-	}
-	
-	/** Continuous capture flag set to TRUE */
-	if(continuous == 1) {
-		int max_name_len = snprintf(NULL,0,continuousFilenameFmt,filename,UINT32_MAX,INT64_MAX);
-		filenamePart = filename;
-		filename = calloc(max_name_len+1,sizeof(char));
-		strcpy(filename,filenamePart);
-	}
+	ParseArguments(argc, argv);
+	CheckValidationFilename (filename, argc, argv);
+	CheckContinuousFlag(continuous);
 	
 	OpenCamera();
 	InitCamera();
@@ -586,12 +589,13 @@ int main(int argc, char **argv)
 	StopCapture();
 	DeInitCamera();
 	CloseCamera();
-
-	writejpegimage(width,height,Image_Buffer->start,filename);
+	
+	Image_Save.start = malloc(width*height*3);
+	Convert_YUV420toYUV444(width, height, Image_Buffer.start, Image_Save.start);
+	writejpegimage(width, height, Image_Save.start, filename);
 
 	exit(EXIT_SUCCESS);
-
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /*==============================[  End of File  ]======================================*/
