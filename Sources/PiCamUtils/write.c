@@ -1,15 +1,17 @@
 /**
  * @file write.c
- * @author your name (you@domain.com)
- * @brief 
- * @version 0.1
- * @date 2022-03-06
+ * @author Prakash Dhungana (dhunganaprakas@gmail.com)
+ * @brief <b> Implementation for writing image files </b>
+ * @version 
+ * @date 2022-03-06	Initial template
+ * @date 2022-03-21 Updates for saving BMP image
+ * @date 2033-03-23 Updates for Gaussian filter and Edge detection
  * 
  * @copyright Copyright (c) 2022
  * 
  */
 
-/** Doxygen compliant formatting for documentation */
+/** Doxygen compliant formatting for comments */
 
 /*===========================[  Inclusions  ]=============================================*/
 
@@ -104,6 +106,53 @@ void writejpegimage(int width, int height, unsigned char* img, char* filename)
 	/* Set JPEG compression parameters to default, adjust quality setting and start conpression */
 	jpeg_set_defaults(&cinfo);
 	jpeg_set_quality(&cinfo, jpegQuality, TRUE);
+	jpeg_start_compress(&cinfo, TRUE);
+
+	/* Feed pixel data */
+	while (cinfo.next_scanline < cinfo.image_height) 
+	{
+		row_pointer[0] = &img[cinfo.next_scanline * cinfo.image_width *  cinfo.input_components];
+		jpeg_write_scanlines(&cinfo, row_pointer, 1);
+	}
+
+	/* Finish compression */
+	jpeg_finish_compress(&cinfo);
+	jpeg_destroy_compress(&cinfo);
+
+	/* Close output image file */
+	fclose(outfile);
+}
+
+/** This function writes captured image buffer as JPEG format. 
+ */ 
+void writejpeggrayscale(int width, int height, unsigned char* img, char* filename)
+{
+	struct jpeg_compress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
+	unsigned char* src = malloc(height*width);
+	memcpy(src, img, height*width);
+
+	JSAMPROW row_pointer[1];
+	FILE *outfile = fopen( filename, "wb" );
+	if (!outfile) {
+		errno_exit("jpeg");
+	}
+
+	/* Create JPEG data */
+	cinfo.err = jpeg_std_error( &jerr );
+	jpeg_create_compress(&cinfo);
+	jpeg_stdio_dest(&cinfo, outfile);
+
+	/* Set image parameters */
+	cinfo.image_width = width;
+	cinfo.image_height = height;
+	cinfo.input_components = 1;
+	cinfo.in_color_space = JCS_GRAYSCALE;
+
+	/* Set JPEG compression parameters to default, adjust quality setting and start conpression */
+	jpeg_set_defaults(&cinfo);
+	jpeg_set_quality(&cinfo, 100, TRUE);
 	jpeg_start_compress(&cinfo, TRUE);
 
 	/* Feed pixel data */

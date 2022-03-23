@@ -1,15 +1,17 @@
 /**
  * @file PiCam.h
  * @author Prakash Dhungana (dhunganaprakas@gmail.com)
- * @brief Header for the main application
+ * @brief <b> Header for the main application </b>
  * @version 
- * @date 2022-03-03    Initial template
+ * @date 2022-03-03 Initial template
+ * @date 2022-03-21 Updates for saving BMP image
+ * @date 2022-03-23 Updates for Gaussian filter and Edge detection
  * 
  * @copyright Copyright (c) 2022
  * 
  */
 
-/** Doxygen compliant formatting for documentation */
+/** Doxygen compliant formatting for comments */
 
 /*===========================[  Compile Flags  ]==========================================*/
 
@@ -28,7 +30,7 @@
 /*============================[  Defines  ]=============================================*/
 
 /** Minimum number of buffers to request in VIDIOC_REQBUFS call */
-#define VIDIOC_REQBUFS_COUNT 2
+#define VIDIOC_REQBUFS_COUNT 3
 
 /*============================[  Data Types  ]==========================================*/
 
@@ -75,15 +77,6 @@ static unsigned int fps = 30;
 
 /** Flag to store information whether ti capture continuous frame or not */
 static int continuous = 0;
-
-/** Variable to store lower limit for Canny edge detection. Default is set to 75 */
-static int lim_canny_lower = 75;
-
-/** Variable to store upper limit for Canny edge detection. Default is set to 150 */
-static int lim_canny_upper = 150;
-
-/** Variable to store limit for Sobel edge detection. Default is set to 100 */
-static int lim_sobel = 100;
 
 /** Default camera name in linux */
 static char* deviceName = "/dev/video0";

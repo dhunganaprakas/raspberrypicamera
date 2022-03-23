@@ -1,9 +1,10 @@
 /**
  * @file Convolutions.c
- * @author Prakash Dhungana (dhunganaprakas)
- * @brief Source for implementation of convolution methods 
- * @version 0.0.1
+ * @author Prakash Dhungana (dhunganaprakas@gmail.com)
+ * @brief <b> Source for implementation of convolution methods </b>
+ * @version 
  * @date 2022-03-06 Initial template
+ * @date 2033-03-23 Updates for Gaussian filter and Edge detection
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -16,72 +17,128 @@
 
 /*===========================[  Inclusions  ]=============================================*/
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
 #include "Convolutions.h"
 
 /*===========================[ Global Variables  ]========================================*/
 
-static double Kernel_Gaussian[3][3] = { {(1/16),(1/8),(1/18)},
-                                 {(1/8),(1/4),(1/8)},
-                                 {(1/16),(1/8),(1/18)}                                
-                                };
+
 
 /*===========================[  Function definitions  ]===================================*/
 /**
  * 
  */ 
-void GaussianFilter(int width, int height, const unsigned char* src, unsigned char* dst)
+void GaussianFilter(int width, int height, unsigned char* src, unsigned char* dst)
 {
-    int x, y, i, j, row, column;
-    /* Update the destination pointer */
-    dst = (dst + width + 1);
+    int x, y, i, j, row, column,temp,position,pixel;
+	double printed = 0;
 
-    for(x = 1; x< (width - 1); x++)
+	memcpy(dst,src, width*height);
+
+    for(x = 1; x < height -1 ; x++)
     {
-		for(y = 1; y < (height - 1); y++)
+		for(y = 1; y < width -1 ; y++)
         {					
-			char * pixel;
-            int mat_pixel[3][3];
-            double blur_pixel;
+            unsigned char mat_pixel[3][3];
+            double blur_pixel = 0;
 
 			for(i = 0 ; i < 3 ; i++)
             {
 				for(j = 0 ; j < 3 ; j++)
                 {
-					mat_pixel[i][j] = *(src  + (x - 1 + i)*width + (y - 1 + j));
+					position = (x - 1 + i)*width + (y - 1 + j);
+					mat_pixel[i][j] =  *(src + position);
+					//printf("pixel value : %d \n", mat_pixel[i][j]);
 				}
 			}			
-			for(int row = 0;row<5;row++)
+			for(row = 0;row < 3;row++)
             {					
-				for(int column = 0;column<5;column++)
+				for(column = 0;column < 3;column++)
                 {
-					for(int temp = 0;temp<5;temp++)
+					for(temp = 0;temp < 3;temp++)
                     {				
-						blur_pixel += Kernel_Gaussian[row][temp] * mat_pixel[temp][column] ;		
+						blur_pixel += ((double)Kernel_Gaussian[row][temp] * mat_pixel[temp][column]) ;	
+						//printf("Adding %f \n", blur_pixel);	
 					}												
 				}
 			}				
-			blur_pixel = (blur_pixel / 9);					
-			*(dst++) = blur_pixel;
+			
+			pixel = LIMITCHAR((int)(blur_pixel/3));		
+			//printf("before %f after %d \n",blur_pixel, pixel);
+			position = x*width + y;			
+			*(dst+position) = pixel;
 		}
 	}		
-
 
 }/* End of function GaussianFilter */
 
 /**
  * 
  */ 
-void CannyEdge_Detector(int width, int height, const unsigned char* src, unsigned char* dst)
+void Edge_Detector(int width, int height, unsigned char* src, unsigned char* dst, EdgeDetector method)
 {
+	int x, y;
+	for(x = 1; x < height - 1; x++)
+	{
+		for(y = 1; y < width - 1; y++)
+		{
+			int Gx = 0;
+			int Gy = 0;
+			int sum_x = 0;
+			int sum_y = 0;
+			int position;
+			unsigned int intensity = 0;
+	
+			char mat_pixel[3][3];			
+			for(int i = 0 ; i < 3 ; i++)
+			{
+				for(int j = 0 ; j < 3 ; j++)
+				{
+					position = (x - 1 + i)*width + (y - 1 + j);
+					mat_pixel[i][j] =  *(src + position);
+				}
+			}	
 
-}/* End of function CannyEdge_Detector */
+			for(int row = 0;row<3;row++)
+			{
+				for(int column = 0;column<3;column++)
+				{
+					for(int temp = 0;temp<3;temp++)
+					{			
+						sum_x += Kernel_H_Edge[row][temp] * mat_pixel[temp][column] ;
+						sum_y += Kernel_V_Edge[row][temp] * mat_pixel[temp][column] ;
+					}						
+				}
+			}
+			Gx = sum_x/9;
+			Gy = sum_y/9;
+			unsigned int length = (unsigned int)sqrt( (float)(Gx * Gx) + (float)(Gy * Gy) );
+			LIMITCHAR(length);								
 
-/**
- * 
- */ 
-void SobelEdge_Detector(int width, int height, const unsigned char* src, unsigned char* dst)
-{
+			position = x*width + y;
+			switch ( method)
+			{
+				case METHOD_CANNY:
+					if ((length > LOWER_LIMIT_CANNY) && (length < UPPER_LIMIT_CANNY))
+						*(dst + position) = 255;
+					break;
 
-}/* End of function SobelEdge_Detector */
+				case METHOD_SOBEL:
+					if ( length > LIMIT_SOBEL)
+						*(dst + position) = 255;
+					break;
+
+				case METHOD_INVALID:
+					printf("Invalid method provided for edge detection.\n");
+					break;
+			}
+		}
+	}
+
+}/* End of function Edge_Detector */
+
 
 /*==============================[  End of File  ]========================================*/

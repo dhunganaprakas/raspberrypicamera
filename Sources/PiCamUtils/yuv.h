@@ -1,15 +1,16 @@
 /**
  * @file yuv.h
- * @author Prakash Dhungana (dhunganaprakas)
- * @brief 
- * @version 0.0.1
+ * @author Prakash Dhungana (dhunganaprakas@gmail.com)
+ * @brief <b> Header for YUV conversion functions </b>
+ * @version
  * @date 2022-03-03 Initial template
+ * @date 2022-03-21 Updates for saving BMP image
  * 
  * @copyright Copyright (c) 2022
  * 
  */
 
-/** Doxygen compliant formatting for documentation */
+/** Doxygen compliant formatting for comments */
 
 
 /*===========================[  Compile Flags  ]==========================================*/

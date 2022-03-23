@@ -1,15 +1,17 @@
 /**
- * @file CameraCapture.c
- * @author Prakash Dhungana (dhunganaprakas)
- * @brief   Source for main application 
- * @version 0.0.1
+ * @file PiCam.c
+ * @author Prakash Dhungana (dhunganaprakas@gmail.com)
+ * @brief   <b> Source for main application </b> 
+ * @version 
  * @date 2022-03-03 Initial template
+ * @date 2022-03-21 Updates for saving BMP image
+ * @date 2022-03-23 Updates for Gaussian filter and Edge detection
  * 
  * @copyright Copyright (c) 2022
  * 
  */
 
-/** Doxygen compliant formatting for documentation */
+/** Doxygen compliant formatting for comments */
 
 /*===========================[  Inclusions  ]=============================================*/
 
@@ -25,7 +27,7 @@
 #include "PiCam.h"
 #include "yuv.h"
 #include "write.h"
-#include "PiCam_copy.h"
+#include "Convolutions.h"
 
 /*============================[  Defines  ]=============================================*/
 
@@ -39,6 +41,9 @@ struct buffer Image_Buffer;
 
 /** Global buffer to save image */
 struct buffer Image_Save;
+
+/** Global buffer to store grayscale image */
+struct buffer Image_grayscale;
 
 
 /*===========================[  Function definitions  ]=================================*/
@@ -133,7 +138,7 @@ static void CaptureFrame(void)
 	numberOfTimeouts = 0;
 	count = 3;
 	printf("Updating image buffer \nSMILE PLEASE \n\t(-_-)\n");
-	
+
 	while (count-- > 0) {
 		for (;;) {
 			fd_set fds;
@@ -249,7 +254,7 @@ static void InitMMAP(void)
 		}
 	}
 
-	if (req.count < 2) {
+	if (req.count < 3) {
 		fprintf(stderr, "Insufficient buffer memory on %s\n", deviceName);
 		exit(EXIT_FAILURE);
 	}
@@ -564,8 +569,10 @@ void ParseArguments(int argc, char **argv)
 	}
 }
 
+/*=======================[  Main Application  ]===============================*/
+
 /**
- * @brief Main app for PiCam library
+ * @brief Main app for PiCam library.
  * 
  * @param[inout] argc	Input argument count
  * @param[inout] argv 	Input argument vector
@@ -590,9 +597,24 @@ int main(int argc, char **argv)
 	DeInitCamera();
 	CloseCamera();
 	
-	Image_Save.start = malloc(width*height*3);
-	Convert_YUV420toYUV444(width, height, Image_Buffer.start, Image_Save.start);
-	writejpegimage(width, height, Image_Save.start, filename);
+	Image_Save.start = malloc(width*height);
+	Image_grayscale.start = malloc(width*height);
+	memcpy(Image_grayscale.start, Image_Buffer.start, width*height);
+	
+	//Convert_YUV420toYUV444(width, height, Image_Buffer.start, Image_Save.start);
+	writejpeggrayscale(width, height, Image_grayscale.start, filename);
+
+	GaussianFilter(width,height,Image_grayscale.start,Image_Save.start);
+	filename = "blurred_image";
+	writejpeggrayscale(width, height, Image_Save.start, filename);
+
+	/** Global buffer to store grayscale image */
+	struct buffer Image_canny;
+	Image_canny.start = malloc(width*height);
+	filename = "canny_image";
+	EdgeDetector edgeMethod = METHOD_CANNY;
+	Edge_Detector(width, height, Image_Save.start, Image_canny.start, edgeMethod);
+	writejpeggrayscale(width, height, Image_canny.start, filename);
 
 	exit(EXIT_SUCCESS);
 	return EXIT_SUCCESS;

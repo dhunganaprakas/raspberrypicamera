@@ -1,15 +1,17 @@
 /**
  * @file write.h
  * @author Prakash Dhungana (dhunganaprakas@gmail.com)
- * @brief   <b> Implementation for writing image </b>
- * @version 0.1
- * @date 2022-03-06
+ * @brief   <b> Header for writing image files </b>
+ * @version 
+ * @date 2022-03-06 Initial template
+ * @date 2022-03-21 Updates for saving BMP image
+ * @date 2033-03-23 Updates for Gaussian filter and Edge detection
  * 
  * @copyright Copyright (c) 2022
  * 
  */
 
-/** Doxygen compliant formatting for documentation */
+/** Doxygen compliant formatting for comments */
 
 /*===========================[  Inclusions  ]=============================================*/
 
@@ -86,10 +88,23 @@ void writebitmapimage(int width, int height, unsigned char* src, char* filename)
 /**
  * @brief Write image as a JPEG file format.
  * 
- * @param img   Input pointer containing image buffer
- * @param filename Filename for image to save
+ * @param width
+ * @param height
+ * @param img       Input pointer containing image buffer
+ * @param filename  Filename for image to save
  * 
  */
 void writejpegimage(int width, int height, unsigned char* img, char* filename);
+
+/**
+ * @brief Write image as a JPEG file format.
+ * 
+ * @param width
+ * @param height
+ * @param img       Input pointer containing image buffer
+ * @param filename  Filename for image to save
+ * 
+ */
+void writejpeggrayscale(int width, int height, unsigned char* img, char* filename);
 
 /*==============================[  End of File  ]======================================*/

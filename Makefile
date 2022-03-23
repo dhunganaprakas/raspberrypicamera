@@ -25,7 +25,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 # These files will have .d instead of .o as the output.
 CCFLAGS := $(INC_FLAGS) -MMD -MP
 
-LDFLAGS := -lv4l2 -ljpeg
+LDFLAGS := -lv4l2 -ljpeg -lm
 
 # The final build step.
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
