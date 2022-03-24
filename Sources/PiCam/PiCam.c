@@ -6,6 +6,7 @@
  * @date 2022-03-03 Initial template
  * @date 2022-03-21 Updates for saving BMP image
  * @date 2022-03-23 Updates for Gaussian filter and Edge detection
+ * @date 2022-03-24 Update for convolution methods
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -615,6 +616,13 @@ int main(int argc, char **argv)
 	EdgeDetector edgeMethod = METHOD_CANNY;
 	Edge_Detector(width, height, Image_Save.start, Image_canny.start, edgeMethod);
 	writejpeggrayscale(width, height, Image_canny.start, filename);
+
+	struct buffer Image_sobel;
+	Image_sobel.start = malloc(width*height);
+	filename = "sobel_image";
+	edgeMethod = METHOD_SOBEL;
+	Edge_Detector(width, height, Image_Save.start, Image_sobel.start, edgeMethod);
+	writejpeggrayscale(width, height, Image_sobel.start, filename);
 
 	exit(EXIT_SUCCESS);
 	return EXIT_SUCCESS;

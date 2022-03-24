@@ -5,7 +5,8 @@
  * @version 
  * @date 2022-03-06	Initial template
  * @date 2022-03-21 Updates for saving BMP image
- * @date 2033-03-23 Updates for Gaussian filter and Edge detection
+ * @date 2022-03-23 Updates for Gaussian filter and Edge detection
+ * @date 2022-03-24 Remove unused variable
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -129,9 +130,6 @@ void writejpeggrayscale(int width, int height, unsigned char* img, char* filenam
 {
 	struct jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr jerr;
-
-	unsigned char* src = malloc(height*width);
-	memcpy(src, img, height*width);
 
 	JSAMPROW row_pointer[1];
 	FILE *outfile = fopen( filename, "wb" );
