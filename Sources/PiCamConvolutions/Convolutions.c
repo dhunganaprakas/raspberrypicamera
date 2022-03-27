@@ -201,31 +201,6 @@ static inline Std_ReturnType Get_MeanM3(Mat3 pixel)
 /** 
  * 
  */
-static inline Std_ReturnType Get_MeanM5(Mat5 pixel)
-{
-	int i, j, temp, lreturn; 
-	double sum;
-
-	for(i = 0 ; i < 5 ; i++)
-	{
-		for(j = 0 ; j < 5 ; j++)
-		{
-			for(temp = 0; temp < 5; temp++)
-			{			
-				sum += (double) (4 * pixel[temp][j]) ;
-			}
-		}
-	}
-
-	lreturn = (int) sum/100;
-
-	return lreturn;
-
-}/* End of function Get_MeanM5 */
-
-/** 
- * 
- */
 static inline Std_ReturnType Get_MedianM3(Mat3 pixel)
 {
 	int i, j; 
