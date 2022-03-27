@@ -56,7 +56,7 @@ struct buffer {
 /** I/O method to use for the library */
 static io_method io = IO_METHOD_MMAP;
 
-/** */
+/** File descriptor */
 static int fd = -1;
 
 /** Variable to store the captured buffer */

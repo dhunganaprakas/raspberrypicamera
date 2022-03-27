@@ -578,7 +578,7 @@ void ParseArguments(int argc, char **argv)
  * @param[inout] argc	Input argument count
  * @param[inout] argv 	Input argument vector
  * 
- * @return int 
+ * @return int Return Status 
  * @retval EXIT_SUCCESS	Returned successfully
  * @retval EXIT_FAILURE	Error encountered
  *  
@@ -605,24 +605,22 @@ int main(int argc, char **argv)
 	//Convert_YUV420toYUV444(width, height, Image_Buffer.start, Image_Save.start);
 	writejpeggrayscale(width, height, Image_grayscale.start, filename);
 
-	GaussianFilter(width,height,Image_grayscale.start,Image_Save.start);
+	GaussianFilter(width,height,Image_grayscale.start,Image_Save.start, 3);
 	filename = "blurred_image";
 	writejpeggrayscale(width, height, Image_Save.start, filename);
 
 	/** Global buffer to store grayscale image */
-	struct buffer Image_canny;
-	Image_canny.start = malloc(width*height);
-	filename = "canny_image";
-	EdgeDetector edgeMethod = METHOD_CANNY;
-	Edge_Detector(width, height, Image_Save.start, Image_canny.start, edgeMethod);
-	writejpeggrayscale(width, height, Image_canny.start, filename);
+	struct buffer Image_mean;
+	Image_mean.start = malloc(width*height);
+	filename = "mean_image";
+	MeanFilter(width, height, Image_grayscale.start, Image_mean.start);
+	writejpeggrayscale(width, height, Image_mean.start, filename);
 
-	struct buffer Image_sobel;
-	Image_sobel.start = malloc(width*height);
-	filename = "sobel_image";
-	edgeMethod = METHOD_SOBEL;
-	Edge_Detector(width, height, Image_Save.start, Image_sobel.start, edgeMethod);
-	writejpeggrayscale(width, height, Image_sobel.start, filename);
+	struct buffer Image_median;
+	Image_median.start = malloc(width*height);
+	filename = "median_image";
+	MedianFilter(width, height, Image_grayscale.start, Image_median.start, 5);
+	writejpeggrayscale(width, height, Image_median.start, filename);
 
 	exit(EXIT_SUCCESS);
 	return EXIT_SUCCESS;

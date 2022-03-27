@@ -16,6 +16,8 @@
 /*===========================[  Inclusions  ]=============================================*/
 
 
+/*============================[  Data Types  ]============================================*/
+
 /** BMP file header structure */
 typedef struct                       
 {
@@ -66,6 +68,7 @@ static char* filename = NULL;
 /** Filename extension */
 static char* filenamePart = NULL;
 
+/*===========================[  Function declarations  ]===================================*/
 
 /**
  * @brief Print error message and terminate program with EXIT_FAILURE return code. 
