@@ -1,10 +1,11 @@
 /**
- * @file yuv.h
+ * @file ColorConversion.h
  * @author Prakash Dhungana (dhunganaprakas@gmail.com)
  * @brief <b> Header for YUV conversion functions </b>
  * @version
  * @date 2022-03-03 Initial template
  * @date 2022-03-21 Updates for saving BMP image
+ * @date 2022-03-28 Rename and move to appropriate folder
  * 
  * @copyright Copyright (c) 2022
  * 

@@ -1,10 +1,11 @@
 /**
- * @file yuv.c
+ * @file ColorConversion.c
  * @author Prakash Dhungana (dhunganaprakas@gmail.com)
  * @brief <b> Implementation for YUV conversion functions </b>
  * @version 
  * @date 2022-03-03 Initial template
  * @date 2022-03-21 Updates for saving BMP image
+ * @date 2022-03-28 Rename and move to appropriate folder
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -17,7 +18,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "write.h"
-#include "yuv.h"
+#include "ColorConversion.h"
 
 /*===========================[  Function definitions  ]===================================*/
 /**

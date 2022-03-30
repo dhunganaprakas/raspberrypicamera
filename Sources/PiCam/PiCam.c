@@ -26,9 +26,10 @@
 #include <linux/videodev2.h>
 #include <stdlib.h>
 #include "PiCam.h"
-#include "yuv.h"
+#include "ColorConversion.h"
 #include "write.h"
 #include "Convolutions.h"
+#include "Edit.h"
 
 /*============================[  Defines  ]=============================================*/
 
@@ -605,22 +606,12 @@ int main(int argc, char **argv)
 	//Convert_YUV420toYUV444(width, height, Image_Buffer.start, Image_Save.start);
 	writejpeggrayscale(width, height, Image_grayscale.start, filename);
 
-	GaussianFilter(width,height,Image_grayscale.start,Image_Save.start, 3);
-	filename = "blurred_image";
-	writejpeggrayscale(width, height, Image_Save.start, filename);
-
 	/** Global buffer to store grayscale image */
-	struct buffer Image_mean;
-	Image_mean.start = malloc(width*height);
-	filename = "mean_image";
-	MeanFilter(width, height, Image_grayscale.start, Image_mean.start);
-	writejpeggrayscale(width, height, Image_mean.start, filename);
-
-	struct buffer Image_median;
-	Image_median.start = malloc(width*height);
-	filename = "median_image";
-	MedianFilter(width, height, Image_grayscale.start, Image_median.start, 5);
-	writejpeggrayscale(width, height, Image_median.start, filename);
+	struct buffer Image_rotate;
+	Image_rotate.start = malloc(width*height);
+	filename = "rotate_image";
+	Rotate_Image(width, height, Image_grayscale.start, Image_rotate.start,90);
+	writejpeggrayscale(width, height, Image_rotate.start, filename);
 
 	exit(EXIT_SUCCESS);
 	return EXIT_SUCCESS;

@@ -28,6 +28,8 @@
 /** Prevent overflow of pixel value */
 #define LIMITCHAR(x) ((x>255)?255:((x<0)?0:x))
 
+/*============================[  Data Types  ]============================================*/
+
 /** Enumeration to indicate which method to use for edge detection */
 typedef enum 
 {
