@@ -4,6 +4,7 @@
  * @brief <b> Header for common utility functions </b>
  * @version 
  * @date 2022-03-27 Initial template for common utilities
+ * @date 2022-04-02 Update validate function for ValidateValue
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -30,24 +31,40 @@ typedef int Std_ReturnType;
 /*===========================[  Function declarations  ]=================================*/
 
 /**
- * @brief Function to validate if the image pointer is not a NULL_PTR
+ * @brief Function to validate input parameter value is within range of Min and Max values. 
+ * 
+ * @param value Value to validate
+ * @param Min   Minimum acceptable value of input param value
+ * @param Max   Maximum acceptable value of input param value
+ * 
+ * @return Std_ReturnType   Validation Status
+ * @retval E_OK             Validation successful
+ * @retval E_NOT_OK         Validation unsuccessful
+ * 
+ */
+Std_ReturnType ValidateValue(float value, int Min, int Max);
+
+/**
+ * @brief Function to validate if the image pointer is not a NULL_PTR.
  * 
  * @param[in] Param 
- * @return Std_ReturnType   Validation status
- * @retval E_OK     Validation successful
- * @retval E_NOT_OK Validation unsuccessful
+ * 
+ * @return Std_ReturnType   Validation Status
+ * @retval E_OK             Validation successful
+ * @retval E_NOT_OK         Validation unsuccessful
  * 
  */
 Std_ReturnType ValidateParam(void* Param);
 
 /**
- * @brief Function to validate if the image size is an even number
+ * @brief Function to validate if the image size is an even number.
  * 
  * @param[in] width     Width of the image
  * @param[in] height    Height of the image
- * @return Std_ReturnType   Validation status 
- * @retval E_OK     Validation successful
- * @retval E_NOT_OK Validation unsuccessful
+ * 
+ * @return Std_ReturnType   Validation Status
+ * @retval E_OK             Validation successful
+ * @retval E_NOT_OK         Validation unsuccessful
  * 
  */
 Std_ReturnType ValidateImageSize(int width, int height);

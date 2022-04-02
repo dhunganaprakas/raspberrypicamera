@@ -4,6 +4,7 @@
  * @brief <b> Implementation of editing functions </b>
  * @version
  * @date 2022-03-28 Initial template
+ * @date 2022-04-02 Update scaling, resizing and flip operations
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -17,6 +18,7 @@
 /*===========================[  Inclusions  ]=============================================*/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "Edit.h"
 
@@ -25,48 +27,6 @@
 
 
 /*===========================[  Function definitions  ]===================================*/
-
-static inline void Interpolate_Bilinear (Rotate_Positions inPos, unsigned char* input, unsigned char* output)
-{
-    int x, y;
-    int VC = inPos.height/2;
-    int HC = inPos.width/2;
-
-    for (x = 0; x < inPos.width; ++x) 
-    {
-        for (y = 0; y < inPos.height; ++y) 
-        {
-            float VP = (float) cos(inPos.rad)*(y - VC)+sin(inPos.rad)*(x - HC) + VC;
-            float HP = (float) -sin(inPos.rad)*(y - VC)+cos(inPos.rad)*(x - HC) + HC;
-
-            int top = floor(VP);
-            int bottom = top + 1;
-            int left = floor(HP);
-            int right = left + 1;
-
-            float top_left = *(input + top*inPos.width + left);
-            float top_right = *(input + top*inPos.width + right);
-            float bottom_left = *(input + bottom*inPos.width + left);
-            float bottom_right = *(input + bottom*inPos.width + right);
-
-            // Figure out "how far" the output pixel being considered is between *_left and *_right.
-            float HD = HP - left;
-            float VD = VP - top;
-
-            // Combine top_left and top_right into one large, horizontal block.
-            int top_block = (int)(top_left + HD * (top_right - top_left));
-
-            // Combine bottom_left and bottom_right into one large, horizontal block.
-            int bottom_block = (int)(bottom_left + HD * (bottom_right - bottom_left));
-
-            // Combine the top_block and bottom_block using vertical interpolation and return as the resulting pixel.
-            if (VP >= 0 && VP < inPos.height && HP >= 0 && HP < inPos.width)
-            {
-                *(output + ((int)VP)*inPos.width + ((int)HP)) = top_block + ((int)VD) * (bottom_block - top_block);
-            }
-        }
-    }
-}
 
 static inline void Copy_Pixels(Rotate_Positions inPos, unsigned char* src, unsigned char* dst)
 {
@@ -113,6 +73,60 @@ static inline void Fill_Gaps(int width, int height, unsigned char* dst)
     }
 }
 
+static inline void HFlip(int width, int height, unsigned char* src, unsigned char* dst)
+{
+    int x, y, src_pos, dst_pos;
+
+    for (x = 0; x < width ; ++x)
+    {
+        for (y = 0; y < height ; ++y)
+        {
+            src_pos = y * width + x;
+            dst_pos = y * width + width - x;
+			
+            *(dst + dst_pos) = *(src + src_pos);				   	 
+        }
+    }
+}
+
+static inline void VFlip(int width, int height, unsigned char* src, unsigned char* dst)
+{
+    int x, y, src_pos, dst_pos;
+
+    for (x = 0; x < width ; ++x)
+    {
+        for (y = 0; y < height ; ++y)
+        {
+            src_pos = y * width + x;
+            dst_pos = (height - y) * width + x;
+			
+            *(dst + dst_pos) = *(src + src_pos);				   	 
+        }
+    }
+
+}
+
+/**
+ * 
+ * 
+ */
+static inline void Interpolate_Scale(Interpolate_Positions inPos, unsigned char* src, unsigned char* dst)
+{
+    int x, y, offset, rowoffset, coloffset;
+
+    for (x = 0; x < inPos.opheight ; ++x)
+    {
+        rowoffset = (int)(x * inPos.height) / inPos.opheight;
+        for (y = 0; y < inPos.opwidth ; ++y)
+        {
+            coloffset = (int)(y*inPos.width)/inPos.opwidth;
+            offset = rowoffset*inPos.width + coloffset;
+
+            *(dst + x * inPos.opwidth + y) = *(src + offset);
+        }
+    }
+}
+
 /** 
  * 
  */
@@ -130,7 +144,6 @@ Std_ReturnType Rotate_Image(int width, int height, unsigned char* src, unsigned 
         Rotate_Positions sendValue = {width, height, rad}; 
         Copy_Pixels(sendValue, src, dst);
         Fill_Gaps(width, height, dst);
-        Fill_Gaps(width, height, dst);
     }
     else
     {
@@ -146,6 +159,22 @@ Std_ReturnType Rotate_Image(int width, int height, unsigned char* src, unsigned 
  */
 Std_ReturnType HorizontalFlip(int width, int height, unsigned char* src, unsigned char* dst)
 {
+    Std_ReturnType validate = E_OK;
+
+	validate += ValidateParam(src);
+	validate += ValidateParam(dst);
+	validate += ValidateImageSize(width, height);
+
+	if (E_OK == validate)
+	{
+        HFlip(width, height, src, dst);
+    }
+    else
+    {
+        printf("Invalid input parameters provided.\n");
+    }
+    
+    return validate;
 
 }/* End of function HorizontalFlip */
 
@@ -155,6 +184,22 @@ Std_ReturnType HorizontalFlip(int width, int height, unsigned char* src, unsigne
  */
 Std_ReturnType VerticalFlip(int width, int height, unsigned char* src, unsigned char* dst)
 {
+    Std_ReturnType validate = E_OK;
+
+	validate += ValidateParam(src);
+	validate += ValidateParam(dst);
+	validate += ValidateImageSize(width, height);
+
+	if (E_OK == validate)
+	{
+        VFlip(width, height, src, dst);
+    }
+    else
+    {
+        printf("Invalid input parameters provided.\n");
+    }
+    
+    return validate;
 
 }/* End of function VerticalFlip */
 
@@ -162,37 +207,64 @@ Std_ReturnType VerticalFlip(int width, int height, unsigned char* src, unsigned 
 /** 
  * 
  */
-Std_ReturnType UpscaleImage_Factor(int width, int height, unsigned char* src, unsigned char* dst, int factor)
+Resized_Image ScaleImage(int width, int height, unsigned char* src, float factor)
 {
+    Std_ReturnType validate = E_OK;
+    int newWidth = (int) width*factor;
+    int newHeight = (int) height*factor;    
+    Resized_Image dst;
+    int fill = 0;
 
-}/* End of function UpscaleImage_Factor */
+	validate += ValidateParam(src);
+	validate += ValidateImageSize(width, height);
+    validate += ValidateValue(factor, 0, 5);
+    dst.width = newWidth;
+    dst.height = newHeight;
+    dst.start = (unsigned char*) malloc(newWidth*newHeight);
 
+    validate += ValidateParam(dst.start);
 
-/** 
- * 
- */
-Std_ReturnType DownscaleImage_Factor(int width, int height, unsigned char* src, unsigned char* dst, int factor)
+	if (E_OK == validate)
+	{       
+        Interpolate_Positions lData = { width, height, newWidth, newHeight};        
+        Interpolate_Scale(lData, src, dst.start);
+    }
+    else
+    {
+        printf("Invalid input parameters provided.\n");
+    }
+
+    return dst;
+
+}/* End of function ScaleImage */
+
+Resized_Image ResizeImage(int width, int height, unsigned char* src, int newWidth, int newHeight)
 {
+    Std_ReturnType validate = E_OK; 
+    Resized_Image dst;
 
-}/* End of function DownscaleImage_Factor */
+	validate += ValidateParam(src);
+	validate += ValidateImageSize(width, height);
+    validate += ValidateImageSize(newWidth, newHeight);
+    dst.width = newWidth;
+    dst.height = newHeight;
+    dst.start = (unsigned char*) malloc(newWidth*newHeight);
 
+    validate += ValidateParam(dst.start);
 
-/** 
- * 
- */
-Std_ReturnType UpscaleImage_Size(int width, int height, unsigned char* src, unsigned char* dst, int newwidth, int newheight)
-{
+	if (E_OK == validate)
+	{       
+        Interpolate_Positions lData = { width, height, newWidth, newHeight};        
+        Interpolate_Scale(lData, src, dst.start);
+    }
+    else
+    {
+        printf("Invalid input parameters provided.\n");
+    }
 
-}/* End of function UpscaleImage_Size */
+    return dst;
 
-
-/** 
- * 
- */
-Std_ReturnType DownscaleImage_Size(int width, int height, unsigned char* src, unsigned char* dst, int newwidth, int newheight)
-{
-
-}/* End of function DownscaleImage_Size */
+}/* End of function ResizeImage */
 
 
 

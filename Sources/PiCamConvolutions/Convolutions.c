@@ -40,6 +40,7 @@ static inline void Populate_PixelMat3(int row, int column, int width, unsigned c
 {
 	int i, j, position;
 
+	/** Populate pixel matrix of size 5x5 */
 	for(i = 0 ; i < 3 ; i++)
 	{
 		for(j = 0 ; j < 3 ; j++)
@@ -60,6 +61,7 @@ static inline void Populate_PixelMat5(int row, int column, int width, unsigned c
 {
 	int i, j, position;
 
+	/** Populate pixel matrix of size 5x5 */
 	for(i = 0 ; i < 5 ; i++)
 	{
 		for(j = 0 ; j < 5 ; j++)
@@ -78,6 +80,7 @@ static inline double Perform_Mat3Conv_1D(Mat3 pixel, Double_Mat3 kernel)
 	int i, j, temp;
 	double lReturn;
 
+	/** Perform convolution using 1D kernel matrix of size 5x5 */
 	for(i = 0; i < 3; i++)
 	{					
 		for(j = 0; j < 3; j++)
@@ -100,6 +103,7 @@ static inline double Perform_Mat5Conv_1D(Mat5 pixel, Double_Mat5 kernel)
 	int i, j, temp;
 	double lReturn;
 
+	/** Perform convolution using 1D kernel matrix of size 5x5 */
 	for(i = 0; i < 5; i++)
 	{					
 		for(j = 0; j < 5; j++)
@@ -124,6 +128,7 @@ static inline Conv2D_Return Perform_Mat3Conv_2D(Mat3 pixel, Mat3 kernel_H, Mat3 
 	lReturn.sum_x = 0;
 	lReturn.sum_y = 0;
 
+	/** Perform convolution using 2D kernel matrix */
 	for(row = 0; row < 3; row++)
 	{
 		for(column = 0; column < 3; column++)
@@ -181,6 +186,7 @@ static inline Std_ReturnType Get_MeanM3(Mat3 pixel)
 	int i, j, temp, lreturn; 
 	double sum;
 
+	/** Calculate sum of output elements of output convolution matrix */
 	for(i = 0 ; i < 3 ; i++)
 	{
 		for(j = 0 ; j < 3 ; j++)
@@ -207,6 +213,7 @@ static inline Std_ReturnType Get_MedianM3(Mat3 pixel)
 	int ip_array[9];
 	int temp = 0;
 
+	/** Populate pixel values */
 	for(i = 0 ; i < 3 ; i++)
 	{
 		for(j = 0 ; j < 3 ; j++)
@@ -216,6 +223,7 @@ static inline Std_ReturnType Get_MedianM3(Mat3 pixel)
 		}
 	}
 
+	/** Sort pixel values in ascending order */
 	for (i = 0; i < 9; i ++)
 	{
 		for (j = 0; j <= i; j++)
@@ -242,6 +250,7 @@ static inline Std_ReturnType Get_MedianM5(Mat5 pixel)
 	int ip_array[25];
 	int temp = 0;
 
+	/** Populate pixel values */
 	for(i = 0 ; i < 5 ; i++)
 	{
 		for(j = 0 ; j < 5 ; j++)
@@ -251,6 +260,7 @@ static inline Std_ReturnType Get_MedianM5(Mat5 pixel)
 		}
 	}
 
+	/** Sort pixel values in ascending order */
 	for (i = 0; i < 25; i ++)
 	{
 		for (j = 0; j <= i; j++)

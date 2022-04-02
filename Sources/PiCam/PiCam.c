@@ -607,11 +607,10 @@ int main(int argc, char **argv)
 	writejpeggrayscale(width, height, Image_grayscale.start, filename);
 
 	/** Global buffer to store grayscale image */
-	struct buffer Image_rotate;
-	Image_rotate.start = malloc(width*height);
+	Resized_Image Image_out;
 	filename = "rotate_image";
-	Rotate_Image(width, height, Image_grayscale.start, Image_rotate.start,90);
-	writejpeggrayscale(width, height, Image_rotate.start, filename);
+	Image_out = ResizeImage(width, height, Image_grayscale.start, 980, 380);
+	writejpeggrayscale(Image_out.width, Image_out.height, Image_out.start, filename);
 
 	exit(EXIT_SUCCESS);
 	return EXIT_SUCCESS;
