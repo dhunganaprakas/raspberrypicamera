@@ -5,6 +5,7 @@
  * @version 
  * @date 2022-03-28 Initial template
  * @date 2022-04-02 Update scaling, resizing and flip operations
+ * @date 2022-04-05 Update editing functions
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -119,6 +120,31 @@ static inline void VFlip(int width, int height, unsigned char* src, unsigned cha
 static inline void Interpolate_Scale(Interpolate_Positions inPos, unsigned char* src, unsigned char* dst);
 
 /**
+ * @brief 
+ * 
+ * @param width     Width of source image
+ * @param height    Hight of source image
+ * @param src       Pointer to starting pixel position of source image 
+ * @param dst       Pointer to starting pixel position of destination image 
+ * @param gain 
+ * @param bias 
+ * 
+ */
+static inline void BLT(int width, int height, unsigned char* src, unsigned char* dst, float gain, float bias);
+
+/**
+ * @brief 
+ * 
+ * @param width     Width of source image
+ * @param height    Hight of source image
+ * @param src       Pointer to starting pixel position of source image 
+ * @param dst       Pointer to starting pixel position of destination image  
+ * @param ratio 
+ * 
+ */
+static inline void TransformConstrast(int width, int height, unsigned char* src, unsigned char* dst, float ratio);
+
+/**
  * @brief   Function to perform rotation of an image.
  * 
  * @param width     Width of source image
@@ -190,6 +216,40 @@ Resized_Image ScaleImage(int width, int height, unsigned char* src, float factor
  * 
  */
 Resized_Image ResizeImage(int width, int height, unsigned char* src, int newWidth, int newHeight);
+
+/**
+ * @brief 
+ * 
+ * @param width 
+ * @param height 
+ * @param src 
+ * @param dst 
+ * @param gain 
+ * @param bias 
+ * 
+ * @return Std_ReturnType   Operation Status
+ * @retval E_OK             Operation successful
+ * @retval E_NOT_OK         Operation unsuccessful 
+ * 
+ */
+Std_ReturnType ContrastEnhancement_BLT(int width, int height, unsigned char* src, unsigned char* dst, float gain, float bias);
+
+
+/**
+ * @brief 
+ * 
+ * @param width 
+ * @param height 
+ * @param src 
+ * @param dst 
+ * @param percent 
+ * 
+ * @return Std_ReturnType   Operation Status
+ * @retval E_OK             Operation successful
+ * @retval E_NOT_OK         Operation unsuccessful 
+ * 
+ */
+Std_ReturnType ContrastEnhancement_Percent(int width, int height, unsigned char* src, unsigned char* dst, int percent);
 
 #endif /* EDIT_H */
 

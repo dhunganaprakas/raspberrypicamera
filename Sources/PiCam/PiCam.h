@@ -53,6 +53,16 @@ struct buffer {
     struct timeval timestamp;
 };
 
+typedef struct
+{
+    /** Width of source image */
+    int width;
+    /** Hight of source image */
+    int height;
+    /** Pointer to starting pixel position */
+    u_int16_t*  start;
+} Image_HSV;
+
 /** I/O method to use for the library */
 static io_method io = IO_METHOD_MMAP;
 

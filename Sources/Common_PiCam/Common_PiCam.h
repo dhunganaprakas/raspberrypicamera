@@ -28,6 +28,9 @@
 /** Type definition for standard return type values to integer */
 typedef int Std_ReturnType;
 
+/** Prevent overflow of pixel value */
+#define LIMITPIXEL(x) ((x>255)?255:((x<0)?0:x))
+
 /*===========================[  Function declarations  ]=================================*/
 
 /**

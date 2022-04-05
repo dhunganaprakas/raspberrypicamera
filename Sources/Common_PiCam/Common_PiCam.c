@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "Common_PiCam.h"
 
-/*===========================[  Function definitions  ]=================================*/
+/*===========================[  Function definitions  ]===================================*/
 
 
 Std_ReturnType ValidateParam(void* Param)
@@ -60,4 +60,4 @@ Std_ReturnType ValidateImageSize(int width, int height)
 }/** End of function ValidateImageSize */
 
 
-/*==============================[  End of File  ]======================================*/
+/*==============================[  End of File  ]===========================================*/

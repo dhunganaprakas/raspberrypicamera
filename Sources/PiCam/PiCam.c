@@ -599,18 +599,28 @@ int main(int argc, char **argv)
 	DeInitCamera();
 	CloseCamera();
 	
-	Image_Save.start = malloc(width*height);
+	Image_Save.start = malloc(width*height*3);
 	Image_grayscale.start = malloc(width*height);
 	memcpy(Image_grayscale.start, Image_Buffer.start, width*height);
 	
-	//Convert_YUV420toYUV444(width, height, Image_Buffer.start, Image_Save.start);
-	writejpeggrayscale(width, height, Image_grayscale.start, filename);
+	Convert_YUV420toYUV444(width, height, Image_Buffer.start, Image_Save.start);
+	writejpegimageYUV(width, height, Image_Save.start, filename);
 
 	/** Global buffer to store grayscale image */
-	Resized_Image Image_out;
-	filename = "rotate_image";
-	Image_out = ResizeImage(width, height, Image_grayscale.start, 980, 380);
-	writejpeggrayscale(Image_out.width, Image_out.height, Image_out.start, filename);
+	struct buffer Image_rgb;
+	Image_HSV Image_hsv;
+	struct buffer Image_rgb_final;
+	filename = "flip_image";
+	Image_rgb.start = malloc(width*height*3);
+	Image_rgb_final.start = malloc(width*height*3);
+	Image_hsv.start = (u_int16_t*) malloc(width*height*3*sizeof(u_int16_t));
+
+	Convert_YUV444toRGB444(width,height,Image_Save.start, Image_rgb.start);
+
+	Convert_RGB444toHSV444(width,height,Image_rgb.start, Image_hsv.start);
+	Convert_HSV444toRGB444(width,height,Image_hsv.start, Image_rgb_final.start);
+
+	writejpegimageRGB(width, height, Image_hsv.start, filename);
 
 	exit(EXIT_SUCCESS);
 	return EXIT_SUCCESS;
