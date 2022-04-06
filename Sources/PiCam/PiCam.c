@@ -17,19 +17,15 @@
 /*===========================[  Inclusions  ]=============================================*/
 
 #include <assert.h>
-#include <getopt.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
-#include <linux/videodev2.h>
+#include <signal.h>
 #include <stdlib.h>
 #include "PiCam.h"
-#include "ColorConversion.h"
 #include "write.h"
-#include "Convolutions.h"
-#include "Edit.h"
 
 /*============================[  Defines  ]=============================================*/
 
@@ -37,15 +33,6 @@
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 
 /*============================[  Global Variables  ]====================================*/
-
-/** Global buffer to store the image to implement desired algorithms and to save it */
-struct buffer Image_Buffer;
-
-/** Global buffer to save image */
-struct buffer Image_Save;
-
-/** Global buffer to store grayscale image */
-struct buffer Image_grayscale;
 
 
 /*===========================[  Function definitions  ]=================================*/
@@ -75,7 +62,7 @@ void InstallSIGINTHandler()
 
 /** Input output control device driver
  */ 
-static int xioctl(int fd, int req, void* argp)
+int xioctl(int fd, int req, void* argp)
 {
 	int r;
 
@@ -87,7 +74,7 @@ static int xioctl(int fd, int req, void* argp)
 
 /** Updates the global buffer from captured buffer from v4l2 
  */ 
-static void Update_LatestBuffer(const void* p, struct timeval timestamp)
+void Update_LatestBuffer(const void* p, struct timeval timestamp)
 {
 	int image_size = width*height*3*sizeof(char)/2;
 	unsigned char* src = (unsigned char*)p;
@@ -97,7 +84,7 @@ static void Update_LatestBuffer(const void* p, struct timeval timestamp)
 
 /**	Read single frame from v4l2 buffer
 */
-static int ReadBuffer(void)
+int ReadBuffer(void)
 {
 	struct v4l2_buffer buf;
     CLEAR(buf);
@@ -122,7 +109,7 @@ static int ReadBuffer(void)
     }
 
     assert(buf.index < n_buffers);
-	Update_LatestBuffer(buffers[buf.index].start,buf.timestamp);
+	Update_LatestBuffer(img_buffer[buf.index].start,buf.timestamp);
 
     if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
         errno_exit("VIDIOC_QBUF");
@@ -132,7 +119,7 @@ static int ReadBuffer(void)
 
 /**	Captures image buffer and stores them in 
 */
-static void CaptureFrame(void)
+void CaptureFrame(void)
 {	
 	int count;
 	unsigned int numberOfTimeouts;
@@ -185,7 +172,7 @@ static void CaptureFrame(void)
 
 /**	Stop capturing v4l2 buffers
 */
-static void StopCapture(void)
+void StopCapture(void)
 {
 	enum v4l2_buf_type type;
 
@@ -197,7 +184,7 @@ static void StopCapture(void)
 
 /** Start capturing v4l2 buffers
 */
-static void StartCapture(void)
+void StartCapture(void)
 {
 	unsigned int i;
 	enum v4l2_buf_type type;
@@ -224,20 +211,20 @@ static void StartCapture(void)
 
 /** De-initializes camera using v4l2_munmap 
 */
-static void DeInitCamera(void)
+void DeInitCamera(void)
 {
 	unsigned int i;
 
     for (i = 0; i < n_buffers; ++i)
-        if (-1 == v4l2_munmap(buffers[i].start, buffers[i].length))
+        if (-1 == v4l2_munmap(img_buffer[i].start, img_buffer[i].length))
             errno_exit("munmap");
 
-	free(buffers);
+	free(img_buffer);
 }
 
 /** Initializes MMAP to capture image buffers form v4l2 library
  */ 
-static void InitMMAP(void)
+void InitMMAP(void)
 {
 	struct v4l2_requestbuffers req;
 
@@ -261,9 +248,9 @@ static void InitMMAP(void)
 		exit(EXIT_FAILURE);
 	}
 
-	buffers = calloc(req.count, sizeof(*buffers));
+	img_buffer = calloc(req.count, sizeof(*img_buffer));
 
-	if (!buffers) {
+	if (!img_buffer) {
 		fprintf(stderr, "Out of memory\n");
 		exit(EXIT_FAILURE);
 	}
@@ -280,14 +267,14 @@ static void InitMMAP(void)
 		if (-1 == xioctl(fd, VIDIOC_QUERYBUF, &buf))
 			errno_exit("VIDIOC_QUERYBUF");
 
-		buffers[n_buffers].length = buf.length;
-		buffers[n_buffers].start = v4l2_mmap(NULL,  /* Start anywhere */ 
+		img_buffer[n_buffers].length = buf.length;
+		img_buffer[n_buffers].start = v4l2_mmap(NULL,  /* Start anywhere */ 
                                             buf.length, PROT_READ | PROT_WRITE, /* Required */
                                             MAP_SHARED, /* Recommended */ 
                                             fd, 
                                             buf.m.offset);
 
-		if (MAP_FAILED == buffers[n_buffers].start)
+		if (MAP_FAILED == img_buffer[n_buffers].start)
 			errno_exit("mmap");
 	}
 }
@@ -355,7 +342,7 @@ void InitializeCameraFormats(struct v4l2_format format)
 
 /** Initializes camera and camera formats to capture v4l2 buffers 
 */
-static void InitCamera(void)
+void InitCamera(void)
 {
 	struct v4l2_capability cap;
 	struct v4l2_cropcap cropcap;
@@ -425,7 +412,7 @@ static void InitCamera(void)
 
 /**	Closes camera
 */
-static void CloseCamera(void)
+void CloseCamera(void)
 {
 	if (-1 == v4l2_close(fd))
 		errno_exit("close");
@@ -435,7 +422,7 @@ static void CloseCamera(void)
 
 /**	Open camera device
 */
-static void OpenCamera(void)
+void OpenCamera(void)
 {
 	struct stat st;
 
@@ -461,18 +448,7 @@ static void OpenCamera(void)
 	}
 }
 
-static void CheckValidationFilename (char* fname, int argc, char** argv)
-{
-	/** Checks for required parameters and prints help if not in order */
-	if (!fname) 
-	{
-		fprintf(stderr, "You have to specify JPEG output filename!\n\n");
-		usage(stdout, argc, argv);
-		exit(EXIT_FAILURE);
-	}
-}
-
-static void CheckContinuousFlag( int flag)
+void CheckContinuousFlag( int flag)
 {
 	/** Continuous capture flag set to TRUE */
 	if(continuous == 1) 
@@ -482,148 +458,6 @@ static void CheckContinuousFlag( int flag)
 		filename = calloc(max_name_len+1,sizeof(char));
 		strcpy(filename,filenamePart);
 	}
-}
-
-static void usage(FILE* fp, int argc, char** argv)
-{
-	fprintf(fp,
-		"Usage: %s [options]\n\n"
-		"Options:\n"
-		"-d | --device name   Video device name [/dev/video0]\n"
-		"-h | --help          Print this message\n"
-		"-o | --output        Set JPEG output filename\n"
-		"-q | --quality       Set JPEG quality (0-100)\n"
-		"-W | --width         Set image width\n"
-		"-H | --height        Set image height\n"
-		"-I | --interval      Set frame interval (fps) (-1 to skip)\n"
-		"-c | --continuous    Do continuos capture, stop with SIGINT.\n"
-		"-v | --version       Print version\n"
-		"",
-		argv[0]);
-}
-
-void ParseArguments(int argc, char **argv)
-{
-	for (;;) 
-	{
-		int index, c = 0;
-		c = getopt_long(argc, argv, short_options, long_options, &index);
-		if (-1 == c)
-			break;
-
-		switch (c) 
-		{
-			case 0: /* getopt_long() flag */
-				break;
-
-			case 'd':
-				/* In case of multiple camera, sets capture device */
-				deviceName = optarg;
-				break;
-
-			case 'h':
-				/* Prints help on usage from CLI */
-				usage(stdout, argc, argv);
-				exit(EXIT_SUCCESS);
-
-			case 'o':
-				/* Set saved image filename */
-				filename = optarg;
-				break;
-
-			case 'q':
-				/* Sets saved image JPEG quality */
-				jpegQuality = atoi(optarg);
-				break;
-
-			case 'W':
-				/* Sets captured image width */
-				width = atoi(optarg);
-				break;
-
-			case 'H':
-				/* Sets captured image height */
-				height = atoi(optarg);
-				break;
-				
-			case 'I':
-				/* Sets fps */
-				fps = atoi(optarg);
-				break;
-
-			case 'c':
-				/* Sets flag for continuous capture */
-				continuous = 1;
-				InstallSIGINTHandler();
-				break;
-				
-			case 'v':
-				/* Prints version information */
-				printf("Version \n");
-				exit(EXIT_SUCCESS);
-				break;
-
-			default:
-				/* Prints usage formats from CLI */
-				usage(stderr, argc, argv);
-				exit(EXIT_FAILURE);
-		}			
-	}
-}
-
-/*=======================[  Main Application  ]===============================*/
-
-/**
- * @brief Main app for PiCam library.
- * 
- * @param[inout] argc	Input argument count
- * @param[inout] argv 	Input argument vector
- * 
- * @return int Return Status 
- * @retval EXIT_SUCCESS	Returned successfully
- * @retval EXIT_FAILURE	Error encountered
- *  
- */
-   
-int main(int argc, char **argv)
-{
-	ParseArguments(argc, argv);
-	CheckValidationFilename (filename, argc, argv);
-	CheckContinuousFlag(continuous);
-	
-	OpenCamera();
-	InitCamera();
-	StartCapture();
-	CaptureFrame();
-	StopCapture();
-	DeInitCamera();
-	CloseCamera();
-	
-	Image_Save.start = malloc(width*height*3);
-	Image_grayscale.start = malloc(width*height);
-	memcpy(Image_grayscale.start, Image_Buffer.start, width*height);
-	
-	Convert_YUV420toYUV444(width, height, Image_Buffer.start, Image_Save.start);
-	writejpegimageYUV(width, height, Image_Save.start, filename);
-
-	/** Global buffer to store grayscale image */
-	struct buffer Image_rgb;
-	Image_HSV Image_hsv;
-	struct buffer Image_rgb_final;
-	filename = "flip_image";
-	Image_rgb.start = malloc(width*height*3);
-	Image_rgb_final.start = malloc(width*height*3);
-	Image_hsv.start = (u_int16_t*) malloc(width*height*3*sizeof(u_int16_t));
-
-	Convert_YUV444toRGB444(width,height,Image_Save.start, Image_rgb.start);
-
-	Convert_RGB444toHSV444(width,height,Image_rgb.start, Image_hsv.start);
-	Convert_HSV444toRGB444(width,height,Image_hsv.start, Image_rgb_final.start);
-
-	writejpegimageRGB(width, height, Image_hsv.start, filename);
-
-	exit(EXIT_SUCCESS);
-	return EXIT_SUCCESS;
 }
 
 /*==============================[  End of File  ]======================================*/

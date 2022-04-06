@@ -17,7 +17,11 @@
 #ifndef COMMON_PICAM_H
 #define  COMMON_PICAM_H
 
-/*============================[  Defines  ]=============================================*/
+/*===========================[  Inclusions  ]============================================*/
+
+#include <sys/time.h>
+
+/*============================[  Defines  ]==============================================*/
 
 /** Macro to indicate function returned with expected operation */
 #define E_OK        (0u)
@@ -25,11 +29,30 @@
 /** Macro to indicate function returned with unexpected operation */
 #define E_NOT_OK    (1u)
 
+/** Prevent overflow of pixel value */
+#define LIMITPIXEL(x) ((x>255)?255:((x<0)?0:x))
+
+/*============================[  DAta Types  ]=========================================*/
+
 /** Type definition for standard return type values to integer */
 typedef int Std_ReturnType;
 
-/** Prevent overflow of pixel value */
-#define LIMITPIXEL(x) ((x>255)?255:((x<0)?0:x))
+struct buffer {
+    /** Pointer to starting pixel position */
+    unsigned char *  start;
+    /** Pixel buffer length */
+    size_t  length;
+    /** Timestamp of captured image buffer */
+    struct timeval timestamp;
+};
+
+/*============================[  Global Variables  ]=====================================*/
+
+/** Flag to store information whether ti capture continuous frame or not */
+int continuous;
+
+/** Global buffer to store the image to implement desired algorithms and to save it */
+struct buffer Image_Buffer;
 
 /*===========================[  Function declarations  ]=================================*/
 

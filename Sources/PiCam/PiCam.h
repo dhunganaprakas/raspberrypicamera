@@ -23,9 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libv4l2.h>
-#include <signal.h>
 #include <inttypes.h>
-#include <jpeglib.h>
+#include <linux/videodev2.h>
+#include "Common_PiCam.h"
 
 /*============================[  Defines  ]=============================================*/
 
@@ -44,15 +44,6 @@ typedef enum {
     IO_METHOD_USERPTR,
 } io_method;
 
-struct buffer {
-    /** Pointer to starting pixel position */
-    unsigned char *  start;
-    /** Pixel buffer length */
-    size_t  length;
-    /** Timestamp of captured image buffer */
-    struct timeval timestamp;
-};
-
 typedef struct
 {
     /** Width of source image */
@@ -70,7 +61,7 @@ static io_method io = IO_METHOD_MMAP;
 static int fd = -1;
 
 /** Variable to store the captured buffer */
-struct buffer * buffers = NULL;
+struct buffer* img_buffer;
 
 /** Number of buffers */
 static unsigned int n_buffers = 0;
@@ -85,34 +76,14 @@ static unsigned int height = 480;
 /** Default camera setting for frames per seconds */
 static unsigned int fps = 30;
 
-/** Flag to store information whether ti capture continuous frame or not */
-static int continuous = 0;
-
 /** Default camera name in linux */
 static char* deviceName = "/dev/video0";
 
 /** Default pixel format to capture */
-uint32_t pixel_format = V4L2_PIX_FMT_YUV420;
+uint32_t pixel_format;
 
 /** Filename to save images incase of continuous capture  */
 static const char* const continuousFilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpg";
-
-static const char short_options [] = "d:ho:q:W:H:I:vc";
-
-/** Usage of arguments passed to application */
-static const struct option long_options [] = 
-{
-	{ "device",     required_argument,      NULL,           'd' },
-	{ "help",       no_argument,            NULL,           'h' },
-	{ "output",     required_argument,      NULL,           'o' },
-	{ "quality",    required_argument,      NULL,           'q' },
-	{ "width",      required_argument,      NULL,           'W' },
-	{ "height",     required_argument,      NULL,           'H' },
-	{ "interval",   required_argument,      NULL,           'I' },
-	{ "version",	no_argument,			NULL,			'v' },
-	{ "continuous",	no_argument,			NULL,			'c' },
-	{ 0, 0, 0, 0 }
-};
 
 /*===========================[  Function declarations  ]===================================*/
 
@@ -144,7 +115,7 @@ void InstallSIGINTHandler(void);
  * @retval  EXIT_FAILURE  Returned with error.
  * 
  */
-static int xioctl(int fd, int req, void* argp);
+int xioctl(int fd, int req, void* argp);
 
 /**
  * @brief Read single frame from buffer.
@@ -154,37 +125,37 @@ static int xioctl(int fd, int req, void* argp);
  * @retval EXIT_FAILURE Operation unsuccessful 
  * 
  */
-static int ReadBuffer(void);
+int ReadBuffer(void);
 
 /**
  * @brief Function to read and process frames.
  * 
  */
-static void CaptureFrame(void);
+void CaptureFrame(void);
 
 /**
  * @brief Stop capturing frames from buffer.
  * 
  */
-static void StopCapture(void);
+void StopCapture(void);
 
 /**
  * @brief Start capturing frames from buffer.
  * 
  */
-static void StartCapture(void);
+void StartCapture(void);
 
 /**
  * @brief De-initialization of device. 
  * 
  */
-static void DeInitCamera(void);
+void DeInitCamera(void);
 
 /**
  * @brief Initialization of MMAP driver.
  * 
  */
-static void InitMMAP(void);
+void InitMMAP(void);
 
 /**
  * @brief Initialize v4l2 formats and checks if the camera settings are supported.
@@ -197,32 +168,19 @@ void InitializeCameraFormats(struct v4l2_format format);
  * @brief Initialization for v4l2 buffer for camera device.
  * 
  */
-static void InitCamera(void);
+void InitCamera(void);
 
 /**
- * @brief Helper function to parse and assign parameters from CLI.
- * 
- * @param[inout] argc   Input argument count
- * @param[inout] argv   Input argument vector
+ * @brief Function to open camera device.
  * 
  */
-void ParseArguments(int argc, char **argv);
+void OpenCamera(void);
 
 /**
- * @brief   Helper function to print usage information 
+ * @brief Function to close camera device.
  * 
- * @param[in] fp    File pointer
- * @param[in] argc  Input argument count
- * @param[in] argv  Input argument vector
  */
-static void usage(FILE* fp, int argc, char** argv);
-
-/**
- * @brief Checks if the filename has been provided for the CLI when running the PiCam library.
- * 
- * @param[in] fname 
- */
-static void CheckValidationFilename (char* fname, int argc, char** argv);
+void CloseCamera(void);
 
 /**
  * @brief Checks if the continuous flag is set and updates the filename formatting 
@@ -230,7 +188,7 @@ static void CheckValidationFilename (char* fname, int argc, char** argv);
  * 
  * @param[in] flag  Flag to set continuous capture
  */
-static void CheckContinuousFlag( int flag);
+void CheckContinuousFlag( int flag);
 
 
 #endif /** PICAM_H **/
