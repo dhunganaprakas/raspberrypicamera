@@ -7,6 +7,7 @@
  * @date 2022-03-21 Updates for saving BMP image
  * @date 2022-03-23 Updates for Gaussian filter and Edge detection
  * @date 2022-03-24 Remove unused variable
+ * @date 2022-04-05 Add saving images for JPEG RGB
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -82,7 +83,7 @@ void writebitmapimage(int width, int height, unsigned char* src, char* filename)
 
 /** This function writes captured image buffer as JPEG format. 
  */ 
-void writejpegimage(int width, int height, unsigned char* img, char* filename)
+void writejpegimageYUV(int width, int height, unsigned char* img, char* filename)
 {
 	struct jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr jerr;
@@ -103,6 +104,51 @@ void writejpegimage(int width, int height, unsigned char* img, char* filename)
 	cinfo.image_height = height;
 	cinfo.input_components = 3;
 	cinfo.in_color_space = JCS_YCbCr;
+
+	/* Set JPEG compression parameters to default, adjust quality setting and start conpression */
+	jpeg_set_defaults(&cinfo);
+	jpeg_set_quality(&cinfo, jpegQuality, TRUE);
+	jpeg_start_compress(&cinfo, TRUE);
+
+	/* Feed pixel data */
+	while (cinfo.next_scanline < cinfo.image_height) 
+	{
+		row_pointer[0] = &img[cinfo.next_scanline * cinfo.image_width *  cinfo.input_components];
+		jpeg_write_scanlines(&cinfo, row_pointer, 1);
+	}
+
+	/* Finish compression */
+	jpeg_finish_compress(&cinfo);
+	jpeg_destroy_compress(&cinfo);
+
+	/* Close output image file */
+	fclose(outfile);
+}
+
+
+/** This function writes captured image buffer as JPEG format. 
+ */ 
+void writejpegimageRGB(int width, int height, unsigned char* img, char* filename)
+{
+	struct jpeg_compress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
+	JSAMPROW row_pointer[1];
+	FILE *outfile = fopen( filename, "wb" );
+	if (!outfile) {
+		errno_exit("jpeg");
+	}
+
+	/* Create JPEG data */
+	cinfo.err = jpeg_std_error( &jerr );
+	jpeg_create_compress(&cinfo);
+	jpeg_stdio_dest(&cinfo, outfile);
+
+	/* Set image parameters */
+	cinfo.image_width = width;
+	cinfo.image_height = height;
+	cinfo.input_components = 3;
+	cinfo.in_color_space = JCS_RGB;
 
 	/* Set JPEG compression parameters to default, adjust quality setting and start conpression */
 	jpeg_set_defaults(&cinfo);

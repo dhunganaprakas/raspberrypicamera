@@ -6,6 +6,7 @@
  * @date 2022-03-06 Initial template
  * @date 2022-03-21 Updates for saving BMP image
  * @date 2033-03-23 Updates for Gaussian filter and Edge detection
+ * @date 2022-04-05 Add saving images for JPEG RGB
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -97,7 +98,18 @@ void writebitmapimage(int width, int height, unsigned char* src, char* filename)
  * @param filename  Filename for image to save
  * 
  */
-void writejpegimage(int width, int height, unsigned char* img, char* filename);
+void writejpegimageYUV(int width, int height, unsigned char* img, char* filename);
+
+/**
+ * @brief Write image as a JPEG file format.
+ * 
+ * @param width
+ * @param height
+ * @param img       Input pointer containing image buffer
+ * @param filename  Filename for image to save
+ * 
+ */
+void writejpegimageRGB(int width, int height, unsigned char* img, char* filename);
 
 /**
  * @brief Write image as a JPEG file format.

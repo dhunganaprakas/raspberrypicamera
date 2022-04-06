@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "edit.h": "c",
+        "videodev2.h": "c",
+        "convolutions.h": "c",
+        "signal.h": "c",
+        "libv4l2.h": "c"
+    }
+}

@@ -1,5 +1,5 @@
 
-TARGET_EXEC := PiCam
+TARGET_EXEC := PiCam_App
 
 BUILD_DIR := Build
 SRC_DIRS := Sources
