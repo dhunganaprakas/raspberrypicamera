@@ -23,20 +23,37 @@
 
 /*============================[  Defines  ]==============================================*/
 
+/** \addtogroup picam_defines Macros	  
+ *  @{
+ */
+
 /** Macro to indicate function returned with expected operation */
 #define E_OK        (0u)
 
 /** Macro to indicate function returned with unexpected operation */
 #define E_NOT_OK    (1u)
 
+/** @} */
+
+/** \addtogroup function_macros Function Macros	  
+ *  @{
+ */
+
 /** Prevent overflow of pixel value */
 #define LIMITPIXEL(x) ((x>255)?255:((x<0)?0:x))
 
+/** @} */
+
 /*============================[  DAta Types  ]=========================================*/
+
+/** \addtogroup data_types Data Types	  
+ *  @{
+ */
 
 /** Type definition for standard return type values to integer */
 typedef int Std_ReturnType;
 
+/** Structure for storing an image pixel values */
 struct buffer {
     /** Pointer to starting pixel position */
     unsigned char *  start;
@@ -46,7 +63,13 @@ struct buffer {
     struct timeval timestamp;
 };
 
+/** @} */
+
 /*============================[  Global Variables  ]=====================================*/
+
+/** \addtogroup global_variables Global Variables	  
+ *  @{
+ */
 
 /** Flag to store information whether ti capture continuous frame or not */
 int continuous;
@@ -54,7 +77,13 @@ int continuous;
 /** Global buffer to store the image to implement desired algorithms and to save it */
 struct buffer Image_Buffer;
 
+/** @} */
+
 /*===========================[  Function declarations  ]=================================*/
+
+/** \addtogroup interface_functions Interface Functions Interface Functions	  
+ *  @{
+ */
 
 /**
  * @brief Function to validate input parameter value is within range of Min and Max values. 
@@ -94,6 +123,8 @@ Std_ReturnType ValidateParam(void* Param);
  * 
  */
 Std_ReturnType ValidateImageSize(int width, int height);
+
+/** @} */
 
 #endif /** COMMON_PICAM_H **/
 

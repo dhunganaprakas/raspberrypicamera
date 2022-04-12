@@ -1,7 +1,7 @@
 /**
  * @file ColorConversion.h
  * @author Prakash Dhungana (dhunganaprakas@gmail.com)
- * @brief <b> Header for YUV conversion functions </b>
+ * @brief <b> Header for color-space conversion functions </b>
  * @version
  * @date 2022-03-03 Initial template
  * @date 2022-03-21 Updates for saving BMP image
@@ -26,10 +26,14 @@
 
 /*============================[  Defines  ]=============================================*/
 
-/** Conversion from YUV color space to RGB 
- *   r = y0 + ((357 * cr) >> 8) - 179;
- *   g = y0 - (( 87 * cb) >> 8) +  44 - ((181 * cr) >> 8) + 91;
- *   b = y0 + ((450 * cb) >> 8) - 226;
+/** \addtogroup function_macros	  
+ *  @{
+ */
+
+/** Conversion from YUV color space to RGB \n
+ *   r = y0 + ((357 * cr) >> 8) - 179;  \n
+ *   g = y0 - (( 87 * cb) >> 8) +  44 - ((181 * cr) >> 8) + 91; \n
+ *   b = y0 + ((450 * cb) >> 8) - 226;  \n
 */
 
 /** Return red pixel value from YUV */
@@ -41,7 +45,13 @@
 /** Return red pixel value from YUV */
 #define GETBLUEPIXEL_FROM_YUV(y, u)     (LIMITPIXEL( (int)(1.164*(y-16) + 2.017*(u-128))))
 
+/** @} */
+
 /*===========================[  Function declarations  ]===================================*/
+
+/** \addtogroup interface_functions Interface Functions	  
+ *  @{
+ */
 
 /**
  * @brief Convert image colorspace format from YUV420 to YUV444.
@@ -108,6 +118,8 @@ void Convert_RGB444toHSV444(int width, int height, unsigned char* src, u_int16_t
  * 
  */
 void Convert_HSV444toRGB444(int width, int height, u_int16_t* src, unsigned char* dst);
+
+/** @} */
 
 #endif /** YUV_H **/
 

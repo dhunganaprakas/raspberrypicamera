@@ -20,6 +20,9 @@
 
 /*===========================[  Function definitions  ]===================================*/
 
+/** \addtogroup interface_functions Interface Functions	  
+ *  @{
+ */
 
 Std_ReturnType ValidateParam(void* Param)
 {
@@ -59,5 +62,6 @@ Std_ReturnType ValidateImageSize(int width, int height)
     
 }/** End of function ValidateImageSize */
 
+/** @} */
 
 /*==============================[  End of File  ]===========================================*/

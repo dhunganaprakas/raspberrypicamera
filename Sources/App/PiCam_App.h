@@ -1,7 +1,7 @@
 /**
  * @file PiCam_App.h
  * @author Prakash Dhungana (dhunganaprakas@gmail.com)
- * @brief <b> Implementation of main application </b>
+ * @brief <b> Header file for main application </b>
  * @version 
  * @date 2022-04-06 
  * 
@@ -25,11 +25,20 @@
 
 
 /*============================[  Global Variables  ]=====================================*/
+/** \addtogroup global_constants	  
+ *  @{
+ */
 
 /** Usage of arguments passed to application for option */
 const char short_options [] = "d:ho:q:W:H:I:vc";
 
+/** @} */
+
 /*===========================[  Function declarations  ]=================================*/
+
+/** \addtogroup internal_functions Internal Functions Internal Functions	  
+ *  @{
+ */
 
 /**
  * @brief Helper function to parse and assign parameters from CLI.
@@ -60,6 +69,7 @@ void usage(FILE* fp, int argc, char** argv);
  */
 void CheckValidationFilename (char* fname, int argc, char** argv);
 
+/** @} */
 
 #endif
 

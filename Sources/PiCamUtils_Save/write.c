@@ -27,11 +27,15 @@
 
 /*===========================[  Function definitions  ]===================================*/
 
+/** \addtogroup interface_functions Interface Functions	  
+ *  @{
+ */
+
 /**	Print error message and terminate program with EXIT_FAILURE return code.
 */
-void errno_exit(const char* s)
+void errno_exit(const char* string_ptr)
 {
-	fprintf(stderr, "%s error %d, %s\n", s, errno, strerror(errno));
+	fprintf(stderr, "%s error %d, %s\n", string_ptr, errno, strerror(errno));
 	exit(EXIT_FAILURE);
 }
 

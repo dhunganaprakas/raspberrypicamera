@@ -1,7 +1,7 @@
 /**
  * @file PiCam_App.c
  * @author Prakash Dhungana (dhunganaprakas@gmail.com)
- * @brief <b> Header for main application </b>
+ * @brief <b> Implementation of main application </b>
  * @version 0.1
  * @date 2022-04-06
  * 
@@ -25,11 +25,21 @@
 
 /*============================[  Global Variables  ]====================================*/
 
+/** \addtogroup global_variables	Global Variables 
+ *  @{
+ */
+
 /** Global buffer to save image */
 struct buffer Image_Save;
 
 /** Global buffer to store grayscale image */
 struct buffer Image_grayscale;
+
+/** @}*/
+
+/** \addtogroup global_constants	Global Constants 
+ *  @{
+ */
 
 /** Usage of arguments passed to application */
 static const struct option long_options [] = 
@@ -46,8 +56,13 @@ static const struct option long_options [] =
 	{ 0, 0, 0, 0 }
 };
 
+/** @}*/
+
 /*===========================[  Function definitions  ]=================================*/
 
+/** \addtogroup internal_functions Internal Functions	  
+ *  @{
+ */
 
 void usage(FILE* fp, int argc, char** argv)
 {
@@ -125,7 +140,7 @@ void ParseArguments(int argc, char **argv)
 				
 			case 'v':
 				/* Prints version information */
-				printf("Version \n");
+				printf("Version V0.1.0 \nDate: 2022-04-12\n");
 				exit(EXIT_SUCCESS);
 				break;
 
@@ -149,7 +164,13 @@ void CheckValidationFilename (char* fname, int argc, char** argv)
 	}
 }
 
+/** @} */
+
 /*=======================[  Main Application  ]===============================*/
+
+/** \addtogroup mainapp	Main Application 
+ *  @{
+ */
 
 /**
  * @brief Main app for PiCam library.
@@ -188,5 +209,6 @@ int main(int argc, char **argv)
 	return EXIT_SUCCESS;
 }
 
+/** @} */
 
 /*==============================[  End of File  ]======================================*/

@@ -1,7 +1,7 @@
 /**
  * @file ColorConversion.c
  * @author Prakash Dhungana (dhunganaprakas@gmail.com)
- * @brief <b> Implementation for YUV conversion functions </b>
+ * @brief <b> Implementation for color-space conversion functions </b>
  * @version 
  * @date 2022-03-03 Initial template
  * @date 2022-03-21 Updates for saving BMP image
@@ -24,6 +24,11 @@
 #include "ColorConversion.h"
 
 /*===========================[  Function definitions  ]===================================*/
+
+/** \addtogroup interface_functions Interface Functions	  
+ *  @{
+ */
+
 /**
  * In this format each four bytes is two pixels in YUV colorspace. Each four bytes has 
  * two Luminance(Y), and single Chrominances namely Chroma Blue(Cb) and Chroma Red(Cr).
@@ -290,5 +295,6 @@ void Convert_HSV444toRGB444(int width, int height, u_int16_t* src, unsigned char
     }
 }/* End of function Convert_HSV444toRGB444 */
 
+/** @} */
 
 /*==============================[  End of File  ]======================================*/

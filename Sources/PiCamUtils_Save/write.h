@@ -19,6 +19,10 @@
 
 /*============================[  Data Types  ]============================================*/
 
+/** \addtogroup data_types	  
+ *  @{
+ */
+
 /** BMP file header structure */
 typedef struct                       
 {
@@ -60,6 +64,14 @@ typedef struct
     unsigned int   biClrImportant;   
 } BITMAPINFOHEADER;
 
+/** @} */
+
+/*============================[  Global Variables  ]=======================================*/
+
+/** \addtogroup global_variables	  
+ *  @{
+ */
+
 /** Image quality for JPEG compression */
 static unsigned char jpegQuality = 70;
 
@@ -69,33 +81,39 @@ static char* filename = NULL;
 /** Filename extension */
 static char* filenamePart = NULL;
 
+/** @} */
+
 /*===========================[  Function declarations  ]===================================*/
+
+/** \addtogroup interface_functions Interface Functions	  
+ *  @{
+ */
 
 /**
  * @brief Print error message and terminate program with EXIT_FAILURE return code. 
  * 
- * @param string_ptr    Error message to print
+ * @param[in] string_ptr    Error message to print
  *  
  */
 void errno_exit(const char* string_ptr);
 
 /**
- * @brief 
+ * @brief Write image as a bmp file format.
  * 
- * @param width 
- * @param height 
- * @param src 
- * @param filename 
+ * @param[in] width     Width of image to be saved
+ * @param[in] height    Height of image to be saved 
+ * @param[in] src       Input pointer containing image buffer
+ * @param[in] filename  Filename for image to save
  */
 void writebitmapimage(int width, int height, unsigned char* src, char* filename);
 
 /**
  * @brief Write image as a JPEG file format.
  * 
- * @param width
- * @param height
- * @param img       Input pointer containing image buffer
- * @param filename  Filename for image to save
+ * @param[in] width     Width of image to be saved
+ * @param[in] height    Height of image to be saved
+ * @param[in] img       Input pointer containing image buffer
+ * @param[in] filename  Filename for image to save
  * 
  */
 void writejpegimageYUV(int width, int height, unsigned char* img, char* filename);
@@ -103,10 +121,10 @@ void writejpegimageYUV(int width, int height, unsigned char* img, char* filename
 /**
  * @brief Write image as a JPEG file format.
  * 
- * @param width
- * @param height
- * @param img       Input pointer containing image buffer
- * @param filename  Filename for image to save
+ * @param[in] width     Width of image to be saved
+ * @param[in] height    Height of image to be saved
+ * @param[in] img       Input pointer containing image buffer
+ * @param[in] filename  Filename for image to save
  * 
  */
 void writejpegimageRGB(int width, int height, unsigned char* img, char* filename);
@@ -114,12 +132,14 @@ void writejpegimageRGB(int width, int height, unsigned char* img, char* filename
 /**
  * @brief Write image as a JPEG file format.
  * 
- * @param width
- * @param height
- * @param img       Input pointer containing image buffer
- * @param filename  Filename for image to save
+ * @param[in] width     Width of image to be saved
+ * @param[in] height    Height of image to be saved
+ * @param[in] img       Input pointer containing image buffer
+ * @param[in] filename  Filename for image to save
  * 
  */
 void writejpeggrayscale(int width, int height, unsigned char* img, char* filename);
+
+/** @} */
 
 /*==============================[  End of File  ]======================================*/
