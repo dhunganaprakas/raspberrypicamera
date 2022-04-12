@@ -95,49 +95,49 @@ enable the changes is available in GNU make documentation.
 
 ### How to run tests
 
-    For testing the application, you can perform following few steps.
-    - ./PiCam -v   or ./PiCam --version from <Repository_root>/Build/
+For testing the application, you can perform following few steps.
+- ./PiCam -v   or ./PiCam --version from <Repository_root>/Build/
 
-    Version information will be printed in the console. An example of the the console output is shown below:
+Version information will be printed in the console. An example of the the console output is shown below:
 
-    ```
-    Version V0.1.0 
-    Date: 2022-04-12
-    ``` 
+```
+Version V0.1.0 
+Date: 2022-04-12
+``` 
 
-    - ./PiCam -h   or ./PiCam --help from <Repository_root>/Build/
+- ./PiCam -h   or ./PiCam --help from <Repository_root>/Build/
 
-    Information on how to run the application and all the available options are printed in the console. 
+Information on how to run the application and all the available options are printed in the console. 
 
-    ```
-    Usage: ./PiCam_App [options]
+```
+Usage: ./PiCam_App [options]
 
-    Options:
-    -d | --device name   Video device name [/dev/video0]
-    -h | --help          Print this message
-    -o | --output        Set JPEG output filename
-    -q | --quality       Set JPEG quality (0-100)
-    -W | --width         Set image width
-    -H | --height        Set image height
-    -I | --interval      Set frame interval (fps) (-1 to skip)
-    -c | --continuous    Do continuos capture, stop with SIGINT.
-    -v | --version       Print version
-    ```
+Options:
+-d | --device name   Video device name [/dev/video0]
+-h | --help          Print this message
+-o | --output        Set JPEG output filename
+-q | --quality       Set JPEG quality (0-100)
+-W | --width         Set image width
+-H | --height        Set image height
+-I | --interval      Set frame interval (fps) (-1 to skip)
+-c | --continuous    Do continuos capture, stop with SIGINT.
+-v | --version       Print version
+```
 
-    - ./Picam -o capture from <Repository_root>/Build/
+- ./Picam -o capture from <Repository_root>/Build/
 
-    Before running this command, please connect the camera device and enable the camera interface from Raspberry Pi preferences. If it is Ubuntu, check if the camera device is available from list of connected devices. This step is the actual step which captures the image and saves the output to  <Repository_root>/Build/capture.jpg. Open the image and check if 
-    capture was successful or not.
+Before running this command, please connect the camera device and enable the camera interface from Raspberry Pi preferences. If it is Ubuntu, check if the camera device is available from list of connected devices. This step is the actual step which captures the image and saves the output to  <Repository_root>/Build/capture.jpg. Open the image and check if 
+capture was successful or not.
 
-    - Generating documentation 
+- Generating documentation 
 
-    For generating the documentation for Raspberry Pi Camera Library, locate the shell directory at  <Repository_root>/doc and run the following 
-    doxygen command.
-    ```
-    doxygen doxygen.ini
-    ```
-    A new folder named PiCam will be created in <Repository_root>/doc. To browse through the documents, open <Repository_root>/doc/PiCam/index.html 
-    file.
+For generating the documentation for Raspberry Pi Camera Library, locate the shell directory at  <Repository_root>/doc and run the following 
+doxygen command.
+```
+doxygen doxygen.ini
+```
+A new folder named PiCam will be created in <Repository_root>/doc. To browse through the documents, open <Repository_root>/doc/PiCam/index.html 
+file.
       
 
 #### Deployment instructions
