@@ -30,6 +30,11 @@
 
 
 /*===========================[  Function definitions  ]===================================*/
+
+/** \addtogroup internal_functions Internal Functions	  
+ *  @{
+ */
+
 /**
  * @note This function assumes the provided pointer for source image pixel data is not a NULL_PTR.
  * @warning NULL_PTR should not be passed to this function in place of src, if NULL_PTR is passed,
@@ -144,8 +149,10 @@ static inline Conv2D_Return Perform_Mat3Conv_2D(Mat3 pixel, Mat3 kernel_H, Mat3 
 	return lReturn;
 }/* End of function Perform_Mat3Conv_2D */
 
-/** 
- * 
+/**
+ * @note This function assumes the provided pointer for destination image pixel data is not a NULL_PTR.
+ * @warning NULL_PTR should not be passed to this function in place of dst, if NULL_PTR is passed,
+ * 			the function doesnot have a sanity check and results in segmentation faults.
  * 
  */
 static inline void Populate_Edges(Conv2D_Return Grad, EdgeDetector method, int width, int h, int v, unsigned char* dst)
@@ -277,6 +284,12 @@ static inline Std_ReturnType Get_MedianM5(Mat5 pixel)
 	return ip_array[12];
 
 }/* End of function Get_MedianM5 */
+
+/** @} */
+
+/** \addtogroup interface_functions Interface Functions	  
+ *  @{
+ */
 
 /**
  * 
@@ -443,5 +456,6 @@ void MedianFilter(int width, int height, unsigned char* src, unsigned char* dst,
 	
 }/* End of function MedianFilter */
 
+/** @} */
 
 /*==============================[  End of File  ]========================================*/

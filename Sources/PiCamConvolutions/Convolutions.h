@@ -25,10 +25,20 @@
 
 /*============================[  Defines  ]===============================================*/
 
+/** \addtogroup function_macros	  
+ *  @{
+ */
+
 /** Prevent overflow of pixel value */
 #define LIMITCHAR(x) ((x>255)?255:((x<0)?0:x))
 
+/** @} */
+
 /*============================[  Data Types  ]============================================*/
+
+/** \addtogroup data_types	  
+ *  @{
+ */
 
 /** Enumeration to indicate which method to use for edge detection */
 typedef enum 
@@ -63,7 +73,13 @@ typedef struct{
     int sum_y;
 }Conv2D_Return;
 
+/** @} */
+
 /*===========================[  Global Variables  ]=======================================*/
+
+/** \addtogroup global_variables	  
+ *  @{
+ */
 
 /** Variable to store lower limit for Canny edge detection. Default is set to 75 */
 static int LOWER_LIMIT_CANNY = 75;
@@ -74,7 +90,13 @@ static int UPPER_LIMIT_CANNY = 125;
 /** Variable to store limit for Sobel edge detection. Default is set to 100 */
 static int LIMIT_SOBEL = 50;
 
+/** @} */
+
 /*============================[  Global Constants  ]=======================================*/
+
+/** \addtogroup global_constants	  
+ *  @{
+ */
 
 /** Kernel matrix of 3X3 size for Gaussian filtering */
 static Double_Mat3 Kernel_Gaussian = {{0.0625,0.125,0.0625},{0.125,0.25,0.125},{0.0625,0.125,0.0625}};
@@ -85,7 +107,13 @@ static Mat3 Kernel_H_Edge = {{-1,0,1},{-2,0,2},{-1,0,1}};
 /** Kernel matrix of 3X3 size for Sobel and Canny edge detection in vertical direction */
 static Mat3 Kernel_V_Edge = {{-1,-2,-1},{0,0,0},{1,2,1}};
 
+/** @} */
+
 /*===========================[  Function declarations  ]==================================*/
+
+/** \addtogroup internal_functions Internal Functions	  
+ *  @{
+ */
 
 /**
  * @brief   Function to fill the required 3X3 pixels form source image buffer to the input matrix lReturn. 
@@ -159,7 +187,9 @@ static inline Conv2D_Return Perform_Mat3Conv_2D(Mat3 pixel, Mat3 kernel_H, Mat3 
  * @param[in] Grad      Gradient values  
  * @param[in] method    Edge detection method
  * @param[in] width     Width of the image
- * @param[inout] dst    Pointer to destination image 
+ * @param[in] h         Row position for pixel to assign value 
+ * @param[in] v         Column position for pixel to assign value
+ * @param[inout] dst    Pointer to destination image  
  */
 static inline void Populate_Edges(Conv2D_Return Grad, EdgeDetector method, int width, int h, int v, unsigned char* dst);
 
@@ -190,6 +220,12 @@ static inline Std_ReturnType Get_MedianM3(Mat3 pixel);
  */
 static inline Std_ReturnType Get_MedianM5(Mat5 pixel);
 
+/** @} */
+
+/** \addtogroup interface_functions Interface Functions	  
+ *  @{
+ */
+
 /**
  * @brief   Function to perform Gaussian filtering.  
  * 
@@ -209,7 +245,6 @@ void GaussianFilter(int width, int height, unsigned char* src, unsigned char* ds
  * @param[in] height    Height of the image
  * @param[in] src       Pointer of source image to apply Gaussian filter 
  * @param[inout] dst    Pointer of destination image to save Gaussian image
- * @param[in]  size     Matrix size to operate on for filtering
  * 
  */
 void MeanFilter(int width, int height, unsigned char* src, unsigned char* dst);
@@ -237,6 +272,8 @@ void MedianFilter(int width, int height, unsigned char* src, unsigned char* dst,
  * 
  */
 void Edge_Detector(int width, int height, unsigned char* src, unsigned char* dst, EdgeDetector method);
+
+/** @} */
 
 #endif /** CONVOLUTIONS_H **/
 

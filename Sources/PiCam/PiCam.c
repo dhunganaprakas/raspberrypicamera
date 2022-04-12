@@ -1,7 +1,8 @@
 /**
  * @file PiCam.c
  * @author Prakash Dhungana (dhunganaprakas@gmail.com)
- * @brief   <b> Source for main application </b> 
+ * @brief   <b> Source file for implementation of APIs for initialization, processing 
+ * 			v4l2 buffers and de-initialization </b> 
  * @version 
  * @date 2022-03-03 Initial template
  * @date 2022-03-21 Updates for saving BMP image
@@ -29,13 +30,23 @@
 
 /*============================[  Defines  ]=============================================*/
 
+/** \addtogroup function_macros	  
+ *  @{
+ */
+
 /** Define macro for clearing memory */
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
+
+/** @} */
 
 /*============================[  Global Variables  ]====================================*/
 
 
 /*===========================[  Function definitions  ]=================================*/
+
+/** \addtogroup internal_functions Internal Functions	  
+ *  @{
+ */
 
 /** Stops continuous capture
  */ 
@@ -115,111 +126,6 @@ int ReadBuffer(void)
         errno_exit("VIDIOC_QBUF");
 
 	return 0;
-}
-
-/**	Captures image buffer and stores them in 
-*/
-void CaptureFrame(void)
-{	
-	int count;
-	unsigned int numberOfTimeouts;
-
-	numberOfTimeouts = 0;
-	count = 3;
-	printf("Updating image buffer \nSMILE PLEASE \n\t(-_-)\n");
-
-	while (count-- > 0) {
-		for (;;) {
-			fd_set fds;
-			struct timeval tv;
-			int r;
-
-			FD_ZERO(&fds);
-			FD_SET(fd, &fds);
-
-			/* Timeout. */
-			tv.tv_sec = 1;
-			tv.tv_usec = 0;
-
-			r = select(fd + 1, &fds, NULL, NULL, &tv);
-
-			if (-1 == r) {
-				if (EINTR == errno)
-					continue;
-
-				errno_exit("select");
-			}
-
-			if (0 == r) {
-				if (numberOfTimeouts <= 0) {
-					count++;
-				} else {
-					fprintf(stderr, "select timeout\n");
-					exit(EXIT_FAILURE);
-				}
-			}
-			if(continuous == 1) {
-				count = 3;
-			}
-
-			if (0 == ReadBuffer())
-				break;
-
-			/* EAGAIN - continue select loop. */
-		}
-	}
-}
-
-/**	Stop capturing v4l2 buffers
-*/
-void StopCapture(void)
-{
-	enum v4l2_buf_type type;
-
-    type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
-    if (-1 == xioctl(fd, VIDIOC_STREAMOFF, &type))
-    errno_exit("VIDIOC_STREAMOFF");
-}
-
-/** Start capturing v4l2 buffers
-*/
-void StartCapture(void)
-{
-	unsigned int i;
-	enum v4l2_buf_type type;
-
-    for (i = 0; i < n_buffers; ++i) 
-    {
-        struct v4l2_buffer buf;
-        CLEAR(buf);
-
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = i;
-
-        if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
-            errno_exit("VIDIOC_QBUF");
-        }
-
-    type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
-    if (-1 == xioctl(fd, VIDIOC_STREAMON, &type))
-        errno_exit("VIDIOC_STREAMON");
-
-}
-
-/** De-initializes camera using v4l2_munmap 
-*/
-void DeInitCamera(void)
-{
-	unsigned int i;
-
-    for (i = 0; i < n_buffers; ++i)
-        if (-1 == v4l2_munmap(img_buffer[i].start, img_buffer[i].length))
-            errno_exit("munmap");
-
-	free(img_buffer);
 }
 
 /** Initializes MMAP to capture image buffers form v4l2 library
@@ -340,6 +246,129 @@ void InitializeCameraFormats(struct v4l2_format format)
 
 }
 
+void CheckContinuousFlag( int flag)
+{
+	/** Continuous capture flag set to TRUE */
+	if(continuous == 1) 
+	{
+		int max_name_len = snprintf(NULL,0,continuousFilenameFmt,filename,UINT32_MAX,INT64_MAX);
+		filenamePart = filename;
+		filename = calloc(max_name_len+1,sizeof(char));
+		strcpy(filename,filenamePart);
+	}
+}
+
+/** @} */
+
+/** \addtogroup interface_functions Interface Functions	  
+ *  @{
+ */
+
+/**	Captures image buffer and stores them in global variable.
+*/
+void CaptureFrame(void)
+{	
+	int count;
+	unsigned int numberOfTimeouts;
+
+	numberOfTimeouts = 0;
+	count = 3;
+	printf("Updating image buffer \nSMILE PLEASE \n\t(-_-)\n");
+
+	while (count-- > 0) {
+		for (;;) {
+			fd_set fds;
+			struct timeval tv;
+			int r;
+
+			FD_ZERO(&fds);
+			FD_SET(fd, &fds);
+
+			/* Timeout. */
+			tv.tv_sec = 1;
+			tv.tv_usec = 0;
+
+			r = select(fd + 1, &fds, NULL, NULL, &tv);
+
+			if (-1 == r) {
+				if (EINTR == errno)
+					continue;
+
+				errno_exit("select");
+			}
+
+			if (0 == r) {
+				if (numberOfTimeouts <= 0) {
+					count++;
+				} else {
+					fprintf(stderr, "select timeout\n");
+					exit(EXIT_FAILURE);
+				}
+			}
+			if(continuous == 1) {
+				count = 3;
+			}
+
+			if (0 == ReadBuffer())
+				break;
+
+			/* EAGAIN - continue select loop. */
+		}
+	}
+}
+
+/**	Stop capturing v4l2 buffers
+*/
+void StopCapture(void)
+{
+	enum v4l2_buf_type type;
+
+    type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    if (-1 == xioctl(fd, VIDIOC_STREAMOFF, &type))
+    errno_exit("VIDIOC_STREAMOFF");
+}
+
+/** Start capturing v4l2 buffers
+*/
+void StartCapture(void)
+{
+	unsigned int i;
+	enum v4l2_buf_type type;
+
+    for (i = 0; i < n_buffers; ++i) 
+    {
+        struct v4l2_buffer buf;
+        CLEAR(buf);
+
+        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf.memory = V4L2_MEMORY_MMAP;
+        buf.index = i;
+
+        if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
+            errno_exit("VIDIOC_QBUF");
+        }
+
+    type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    if (-1 == xioctl(fd, VIDIOC_STREAMON, &type))
+        errno_exit("VIDIOC_STREAMON");
+
+}
+
+/** De-initializes camera using v4l2_munmap 
+*/
+void DeInitCamera(void)
+{
+	unsigned int i;
+
+    for (i = 0; i < n_buffers; ++i)
+        if (-1 == v4l2_munmap(img_buffer[i].start, img_buffer[i].length))
+            errno_exit("munmap");
+
+	free(img_buffer);
+}
+
 /** Initializes camera and camera formats to capture v4l2 buffers 
 */
 void InitCamera(void)
@@ -448,16 +477,6 @@ void OpenCamera(void)
 	}
 }
 
-void CheckContinuousFlag( int flag)
-{
-	/** Continuous capture flag set to TRUE */
-	if(continuous == 1) 
-	{
-		int max_name_len = snprintf(NULL,0,continuousFilenameFmt,filename,UINT32_MAX,INT64_MAX);
-		filenamePart = filename;
-		filename = calloc(max_name_len+1,sizeof(char));
-		strcpy(filename,filenamePart);
-	}
-}
+/** @} */
 
 /*==============================[  End of File  ]======================================*/

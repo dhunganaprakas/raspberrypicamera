@@ -30,6 +30,10 @@
 
 /*===========================[  Function definitions  ]===================================*/
 
+/** \addtogroup internal_functions Internal Functions	  
+ *  @{
+ */
+
 /**
  * @note This function assumes the provided pointer for source image pixel data is not a NULL_PTR.
  * @warning NULL_PTR should not be passed to this function in place of src and dst, if NULL_PTR is passed,
@@ -229,6 +233,12 @@ static inline void TransformConstrast(int width, int height, unsigned char* src,
     }    
 }
 
+/** @} */
+
+/** \addtogroup interface_functions Interface Functions	  
+ *  @{
+ */
+
 /** 
  * 
  */
@@ -422,5 +432,7 @@ Std_ReturnType ContrastEnhancement_Percent(int width, int height, unsigned char*
 
 }/* End of function ContrastEnhancement_Percent */
 
+
+/** @} */
 
 /*==============================[  End of File  ]========================================*/

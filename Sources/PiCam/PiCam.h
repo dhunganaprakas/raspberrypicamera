@@ -1,7 +1,7 @@
 /**
  * @file PiCam.h
  * @author Prakash Dhungana (dhunganaprakas@gmail.com)
- * @brief <b> Header for the main application </b>
+ * @brief <b> Header for camera initialization, processing v4l2 buffers and de-initialization </b>
  * @version 
  * @date 2022-03-03 Initial template
  * @date 2022-03-21 Updates for saving BMP image
@@ -29,10 +29,20 @@
 
 /*============================[  Defines  ]=============================================*/
 
+/** \addtogroup picam_defines	  
+ *  @{
+ */
+
 /** Minimum number of buffers to request in VIDIOC_REQBUFS call */
 #define VIDIOC_REQBUFS_COUNT 3
 
+/** @} */
+
 /*============================[  Data Types  ]==========================================*/
+
+/** \addtogroup data_types	  
+ *  @{
+ */
 
 /** Enumeration fot I/O method configuration */
 typedef enum {
@@ -53,6 +63,14 @@ typedef struct
     /** Pointer to starting pixel position */
     u_int16_t*  start;
 } Image_HSV;
+
+/** @} */
+
+/*============================[  Global Variables  ]=====================================*/
+
+/** \addtogroup global_variables	  
+ *  @{
+ */
 
 /** I/O method to use for the library */
 static io_method io = IO_METHOD_MMAP;
@@ -82,10 +100,22 @@ static char* deviceName = "/dev/video0";
 /** Default pixel format to capture */
 uint32_t pixel_format;
 
+/** @} */
+
+/** \addtogroup global_constants	  
+ *  @{
+ */
+
 /** Filename to save images incase of continuous capture  */
 static const char* const continuousFilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpg";
 
+/** @} */
+
 /*===========================[  Function declarations  ]===================================*/
+
+/** \addtogroup internal_functions Internal Functions	  
+ *  @{
+ */
 
 /**
  * @brief Stop SIGINT interput handler.
@@ -110,7 +140,7 @@ void InstallSIGINTHandler(void);
  * @param[in] req   Request
  * @param[in] argp  Argument 
  * 
- * @return int 
+ * @return int Input output control status
  * @retval  EXIT_SUCCESS  Returned successfully.
  * @retval  EXIT_FAILURE  Returned with error.
  * 
@@ -120,12 +150,48 @@ int xioctl(int fd, int req, void* argp);
 /**
  * @brief Read single frame from buffer.
  * 
- * @return int
+ * @return int  Operation Status
  * @retval EXIT_SUCCESS Operation successful
  * @retval EXIT_FAILURE Operation unsuccessful 
  * 
  */
 int ReadBuffer(void);
+
+/**
+ * @brief   Function to update local and global image pixel buffer from captured v4l2 buffer.   
+ * 
+ * @param[in] p         Pointer to captured buffer
+ * @param[in] timestamp Timestamp of captured buffer 
+ * 
+ */
+void Update_LatestBuffer(const void* p, struct timeval timestamp);
+
+/**
+ * @brief Initialization of MMAP driver.
+ * 
+ */
+void InitMMAP(void);
+
+/**
+ * @brief Initialize v4l2 formats and checks if the camera settings are supported.
+ * 
+ * @param[in] format    Camera format to initialize
+ */
+void InitializeCameraFormats(struct v4l2_format format);
+
+/**
+ * @brief Checks if the continuous flag is set and updates the filename formatting 
+ * to save the captured image using timestamp.
+ * 
+ * @param[in] flag  Flag to set continuous capture
+ */
+void CheckContinuousFlag( int flag);
+
+/** @} */
+
+/** \addtogroup interface_functions Interface Functions	  
+ *  @{
+ */
 
 /**
  * @brief Function to read and process frames.
@@ -152,19 +218,6 @@ void StartCapture(void);
 void DeInitCamera(void);
 
 /**
- * @brief Initialization of MMAP driver.
- * 
- */
-void InitMMAP(void);
-
-/**
- * @brief Initialize v4l2 formats and checks if the camera settings are supported.
- * 
- * @param[in] format    Camera format to initialize
- */
-void InitializeCameraFormats(struct v4l2_format format);
-
-/**
  * @brief Initialization for v4l2 buffer for camera device.
  * 
  */
@@ -182,14 +235,7 @@ void OpenCamera(void);
  */
 void CloseCamera(void);
 
-/**
- * @brief Checks if the continuous flag is set and updates the filename formatting 
- * to save the captured image using timestamp.
- * 
- * @param[in] flag  Flag to set continuous capture
- */
-void CheckContinuousFlag( int flag);
-
+/** @} */
 
 #endif /** PICAM_H **/
 
