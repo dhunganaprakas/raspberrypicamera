@@ -51,7 +51,7 @@ Captures the image and saves the output image in <Repository_root>/Build/<filena
 V0.1.0  [First Release for Raspberry Pi]
 
 
-### How do I set up done? ###
+### How do I set up? ###
 
 #### Dependencies
 
